@@ -1,0 +1,217 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Food and Mood Tracker</title>
+  <link rel="stylesheet" href="style.css" />
+      </head>
+      <body>
+        <main class="app-shell">
+          <section class="home-view">
+      <header class="top-header">
+        <h1>Hi <span id="userName">Anthea</span></h1>
+
+        <div class="header-actions">
+
+          <button
+            class="weather-button"
+            id="weatherButton"
+            aria-label="Current weather"
+          >
+            <span id="weatherIcon">☀️</span>
+          </button>
+        </div>
+      </header>
+
+      <nav class="week-nav" aria-label="Week navigation">
+        <button class="week-arrow" id="prevWeek" aria-label="Previous week">‹</button>
+        <div class="week-days" id="weekDays"></div>
+        <button class="week-arrow" id="nextWeek" aria-label="Next week">›</button>
+      </nav>
+
+      <div class="meal-scroll-wrapper">
+        <section class="meal-scroll" id="mealCards" aria-label="Meal cards"></section>
+
+        <div class="swipe-hint">
+          <span>←</span>
+          <small>左右滑動查看更多</small>
+          <span>→</span>
+        </div>
+      </div>
+
+    <div class="nutrition-swipe">
+      <section class="card nutrition-card nutrition-slide">
+        <p class="section-label">飲食攝取量</p>
+        <h2 id="intakeStatus">尚未記錄</h2>
+
+        <div class="nutrition-layout">
+          <div class="donut-wrap">
+            <svg viewBox="0 0 130 130" class="donut" aria-label="Nutrition chart">
+              <circle cx="65" cy="65" r="55" class="donut-bg" />
+              <circle cx="65" cy="65" r="55" class="donut-segment donut-carbs" id="carbsArc" />
+              <circle cx="65" cy="65" r="55" class="donut-segment donut-protein" id="proteinArc" />
+              <circle cx="65" cy="65" r="55" class="donut-segment donut-fat" id="fatArc" />
+              <circle cx="65" cy="65" r="55" class="donut-segment donut-fiber" id="fiberArc" />
+            </svg>
+            <div class="donut-center">
+              <strong id="totalCalories">0</strong>
+              <span>Cal</span>
+            </div>
+          </div>
+
+<dl class="macro-list">
+
+  <div>
+    <dt>
+      <span class="macro-dot carbs"></span>
+      碳水化合物
+    </dt>
+    <dd id="totalCarbs">0g</dd>
+  </div>
+
+  <div>
+    <dt>
+      <span class="macro-dot protein"></span>
+      蛋白質
+    </dt>
+    <dd id="totalProtein">0g</dd>
+  </div>
+
+  <div>
+    <dt>
+      <span class="macro-dot fat"></span>
+      脂肪
+    </dt>
+    <dd id="totalFat">0g</dd>
+  </div>
+
+  <div>
+    <dt>
+      <span class="macro-dot fiber"></span>
+      膳食纖維
+    </dt>
+    <dd id="totalFiber">0g</dd>
+  </div>
+
+</dl>
+        </div>
+      </section>
+
+      <section class="card food-color-card nutrition-slide">
+        <p class="section-label">食物類型</p>
+        <div class="food-color-list" id="foodGroups"></div>
+      </section>
+    </div>
+
+      <section class="card mood-card">
+        <div class="mood-tabs" id="moodTabs">
+          <button data-mood="body" class="mood-tab active">
+            <div class="mood-tab-label">
+              <span class="mood-color body"></span>
+              <small>身體狀態</small>
+            </div>
+            <span>😊</span>
+          </button>
+
+          <button data-mood="mood" class="mood-tab">
+            <div class="mood-tab-label">
+              <span class="mood-color mood"></span>
+              <small>心情</small>
+            </div>
+            <span>😄</span>
+          </button>
+
+          <button data-mood="stress" class="mood-tab">
+            <div class="mood-tab-label">
+              <span class="mood-color stress"></span>
+              <small>壓力</small>
+            </div>
+            <span>😰</span>
+          </button>
+        </div>
+        <div class="trend-area">
+          <div class="trend-labels"><span>早餐</span><span>午餐</span><span>晚餐</span><span>零食</span></div>
+          <svg class="trend-chart" viewBox="0 0 240 100" preserveAspectRatio="none">
+            <!-- axis first, so it stays behind -->
+            <line x1="0" y1="60" x2="240" y2="60" class="axis axis-x" />
+            <line x1="0" y1="20" x2="0" y2="100" class="axis axis-y" />
+
+            <!-- trend lines after axis -->
+            <polyline id="beforeTrend" points="" class="trend-line before" />
+            <polyline id="afterTrend" points="" class="trend-line after" />
+
+            <!-- dots last, so they stay on top -->
+            <circle id="beforeDot" cx="0" cy="0" r="0" class="trend-dot before-dot" />
+            <circle id="afterDot" cx="0" cy="0" r="0" class="trend-dot after-dot" />
+          </svg>
+          <div class="trend-legend">
+            <div class="legend-item">
+              <span class="legend-dot before"></span>
+              <small>Before meal</small>
+            </div>
+
+            <div class="legend-item">
+              <span class="legend-dot after"></span>
+              <small>After meal</small>
+            </div>
+            </div>
+          </div>
+      </section>
+
+      <section class="context-grid">
+        <article class="card small-card">
+          <h2>飲食情境</h2>
+          <div class="context-tags" id="contextTags">
+            <span>who</span><span>where</span><span>why</span><span>activity</span>
+          </div>
+        </article>
+        <article class="card small-card">
+          <div class="card-title-row">
+            <h2>筆記</h2>
+            <button id="editNoteButton" class="edit-note-button" aria-label="Edit note">✎</button>
+          </div>
+          <p class="note" id="selectedNote">新增筆記</p>
+        </article>
+      </section>
+
+      <section class="card physical-card">
+        <div class="physical-item">
+          <span class="physical-icon">💤</span>
+          <strong id="sleepDuration">--</strong>
+          <small>睡眠時間</small>
+        </div>
+
+        <div class="physical-item">
+          <span class="physical-icon">🌙</span>
+          <strong id="sleepScore">--</strong>
+          <small>睡眠分數</small>
+        </div>
+
+        <div class="physical-item">
+          <span class="physical-icon">👣</span>
+          <strong id="stepCount">--</strong>
+          <small>步數</small>
+        </div>
+
+        <div class="physical-item">
+          <span class="physical-icon">😩</span>
+          <strong id="stressScore">--</strong>
+          <small>壓力分數</small>
+        </div>
+      </section>
+    </section>
+
+    <nav class="bottom-nav" aria-label="Bottom navigation">
+      <button class="nav-item active"><span>🏠</span><small>Homepage</small></button>
+      <button class="add-button" id="addButton" aria-label="Add food entry">＋</button>
+      <button class="nav-item" id="insightsButton"><span>💡</span><small>Insights</small></button>
+    </nav>
+
+  </main>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="supabaseClient.js"></script>
+  <script src="user.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>

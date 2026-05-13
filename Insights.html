@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Weekly Insights</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <main class="app-shell insights-shell">
+    <section class="insights-page">
+      <header class="insights-header">
+        <h1>Weekly insights</h1>
+        <p>過去七天的飲食、心情與生活狀態回顧</p>
+      </header>
+
+      <section class="insight-section">
+        <h2>讓你有活力的餐點💪</h2>
+        <div class="insight-meal-grid" id="energyMeals"></div>
+      </section>
+
+      <section class="insight-section">
+        <h2>吃完心情好的餐點😄</h2>
+        <div class="insight-meal-grid" id="happyMeals"></div>
+      </section>
+
+      <section class="insight-section">
+        <h2>心情低落時或壓力大時的餐點😥</h2>
+        <div class="insight-meal-grid" id="stressMeals"></div>
+      </section>
+
+      <section class="trend-card">
+        <h2>👀你知道嗎？</h2>
+        <p class="trend-subtitle">看看你的狀態變化吧</p>
+
+        <svg class="insight-chart" viewBox="-60 0 390 240">
+          <line x1="-50" y1="200" x2="320" y2="200" class="chart-axis" />
+          <line x1="-50" y1="10" x2="-50" y2="200" class="chart-axis" />
+
+          <polyline id="intakeLine" class="chart-line intake" points="" />
+          <polyline id="moodLine" class="chart-line mood" points="" />
+          <polyline id="stressLine" class="chart-line stress" points="" />
+          <polyline id="sleepLine" class="chart-line sleep" points="" />
+          <polyline id="stepsLine" class="chart-line steps" points="" />
+          <g id="xAxisLabels"></g>
+        </svg>
+
+        <div class="trend-filter-buttons">
+          <button class="trend-filter active intake" data-line="intakeLine">
+            飲食攝取量
+          </button>
+
+          <button class="trend-filter active mood" data-line="moodLine">
+            心情
+          </button>
+
+          <button class="trend-filter stress" data-line="stressLine">
+            壓力
+          </button>
+
+          <button class="trend-filter sleep" data-line="sleepLine">
+            睡眠分數
+          </button>
+
+          <button class="trend-filter steps" data-line="stepsLine">
+            步數
+          </button>
+        </div>
+      </section>
+    </section>
+
+    <nav class="bottom-nav" aria-label="Bottom navigation">
+      <button class="nav-item" onclick="location.href='index.html'">
+        <span>🏠</span><small>Homepage</small>
+      </button>
+      <button class="add-button" onclick="location.href='record.html'">＋</button>
+      <button class="nav-item active">
+        <span>💡</span><small>Insights</small>
+      </button>
+    </nav>
+  </main>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="supabaseClient.js"></script>
+  <script src="user.js"></script>
+  <script src="insights.js"></script>
+</body>
+</html>
