@@ -151,12 +151,12 @@ h2 { margin: 0; font-size: 16px; font-weight: 600; }
 }
 
 .login-title span:first-child {
-  font-size: 64px;
+  font-size: 40px;
   font-weight: 900;
 }
 
 .login-title span:last-child {
-  font-size: 72px;
+  font-size: 50px;
   font-weight: 900;
 }
 
