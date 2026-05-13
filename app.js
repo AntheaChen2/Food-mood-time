@@ -766,7 +766,7 @@ document.getElementById("addButton").addEventListener("click", () => {
 });
 
 document.getElementById("insightsButton").addEventListener("click", () => {
-  window.location.href = "insights.html";
+  window.location.href = "Insights.html";
 });
 
 document.querySelectorAll(".mood-tab").forEach(button => {
