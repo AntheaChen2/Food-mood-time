@@ -30,7 +30,7 @@
             <h2>你吃了什麼？ <span class="required-dot" aria-label="必填"></span></h2>
           </div>
         </div>
-        <p class="hint">請以照片為主，這樣Gemini和人工進行營養比對會比較準確～</p>
+        <p class="hint">會由Gemini和人工進行營養資訊分析～</p>
 
         <div class="type-switch" role="group" aria-label="Input type">
           <button type="button" class="switch-btn active" data-type="photo">照片</button>
@@ -49,7 +49,7 @@
         <div class="text-panel hidden" id="textPanel">
           <label class="field-label" for="foodText">食物描述 <span class="required-dot" aria-label="必填"></span></label>
           <textarea id="foodText" name="foodText" rows="4" placeholder="例如：一碗滷肉飯、燙青菜、無糖綠茶"></textarea>
-          <p class="field-tip">寫出食物名稱、份量，越詳細越好會幫助後續營養分析～</p>
+          <p class="field-tip">寫出食物名稱、份量，越詳細越好會幫助後續營養分析</p>
           <p class="field-error hidden" id="textError">請輸入食物描述。</p>
         </div>
       </section>
@@ -133,6 +133,7 @@
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="supabaseClient.js"></script>
   <script src="user.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/heic2any/dist/heic2any.min.js"></script>
   <script src="record.js"></script>
 </body>
 </html>
