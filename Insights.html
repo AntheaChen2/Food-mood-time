@@ -14,6 +14,94 @@
         <p>過去七天的飲食、心情與生活狀態回顧</p>
       </header>
 
+  <section class="trend-card comparison-trend-card">
+
+  <h2>👀你知道嗎？</h2>
+
+  <p class="trend-subtitle">
+    選兩個指標，看看過去七天的狀態變化吧
+  </p>
+
+  <div class="dual-chart-header">
+
+    <select id="chartSelectLeft" class="chart-select">
+      <option value="intake">飲食份量感受</option>
+      <option value="moodBefore">飯前心情</option>
+      <option value="moodAfter">飯後心情</option>
+      <option value="bodyBefore">飯前身體狀態</option>
+      <option value="bodyAfter">飯後身體狀態</option>
+      <option value="stressScore">壓力分數</option>
+      <option value="sleepMinutes">睡眠時長</option>
+      <option value="steps">步數</option>
+    </select>
+
+    <select id="chartSelectRight" class="chart-select">
+      <option value="">請選擇</option>
+      <option value="intake">飲食份量感受</option>
+      <option value="moodBefore">飯前心情</option>
+      <option value="moodAfter">飯後心情</option>
+      <option value="bodyBefore">飯前身體狀態</option>
+      <option value="bodyAfter">飯後身體狀態</option>
+      <option value="stressScore">壓力分數</option>
+      <option value="sleepMinutes">睡眠時長</option>
+      <option value="steps">步數</option>
+    </select>
+
+  </div>
+
+  <svg
+    class="dual-insight-chart"
+    id="dualChart"
+    viewBox="0 0 390 230"
+  >
+
+    <!-- 左 y 軸 -->
+    <line x1="58" y1="34" x2="58" y2="175" class="mini-axis" />
+
+    <!-- 右 y 軸 -->
+    <line x1="322" y1="34" x2="322" y2="175" class="mini-axis" />
+
+    <!-- x 軸 -->
+    <line x1="58" y1="175" x2="322" y2="175" class="mini-axis" />
+
+    <!-- 左 labels -->
+    <g id="leftYLabels"></g>
+
+    <!-- 右 labels -->
+    <g id="rightYLabels"></g>
+
+    <!-- x labels -->
+    <g id="dualXLabels"></g>
+
+    <!-- 左線 -->
+    <polyline
+      id="leftChartLine"
+      class="dual-chart-line"
+      points=""
+    />
+
+    <!-- 右線 -->
+    <polyline
+      id="rightChartLine"
+      class="dual-chart-line"
+      points=""
+    />
+
+    <!-- dots -->
+    <g id="leftChartDots"></g>
+    <g id="rightChartDots"></g>
+
+  </svg>
+
+  <div class="date-range-controls">
+  <label>
+    <span>開始日期</span>
+    <input type="date" id="startDateInput" />
+  </label>
+</div>
+
+  </section>
+
       <section class="insight-section">
         <h2>讓你有活力的餐點💪</h2>
         <div class="insight-meal-grid" id="energyMeals"></div>
@@ -29,44 +117,6 @@
         <div class="insight-meal-grid" id="stressMeals"></div>
       </section>
 
-      <section class="trend-card">
-        <h2>👀你知道嗎？</h2>
-        <p class="trend-subtitle">看看你的狀態變化吧</p>
-
-        <svg class="insight-chart" viewBox="-60 0 390 240">
-          <line x1="-50" y1="200" x2="320" y2="200" class="chart-axis" />
-          <line x1="-50" y1="10" x2="-50" y2="200" class="chart-axis" />
-
-          <polyline id="intakeLine" class="chart-line intake" points="" />
-          <polyline id="moodLine" class="chart-line mood" points="" />
-          <polyline id="stressLine" class="chart-line stress" points="" />
-          <polyline id="sleepLine" class="chart-line sleep" points="" />
-          <polyline id="stepsLine" class="chart-line steps" points="" />
-          <g id="xAxisLabels"></g>
-        </svg>
-
-        <div class="trend-filter-buttons">
-          <button class="trend-filter active intake" data-line="intakeLine">
-            飲食攝取量
-          </button>
-
-          <button class="trend-filter active mood" data-line="moodLine">
-            心情
-          </button>
-
-          <button class="trend-filter stress" data-line="stressLine">
-            壓力
-          </button>
-
-          <button class="trend-filter sleep" data-line="sleepLine">
-            睡眠分數
-          </button>
-
-          <button class="trend-filter steps" data-line="stepsLine">
-            步數
-          </button>
-        </div>
-      </section>
     </section>
 
     <nav class="bottom-nav" aria-label="Bottom navigation">
