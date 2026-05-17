@@ -792,15 +792,15 @@ function renderDualYLabels(
   document.getElementById(
     "leftYLabels"
   ).innerHTML = `
-    <text x="15" y="38" class="dual-y-label">
+    <text x="52" y="28" text-anchor="end" class="dual-y-label">
       ${leftConfig.topLabel}
     </text>
 
-    <text x="15" y="106" class="dual-y-label">
+    <text x="52" y="108" text-anchor="end" class="dual-y-label">
       ${leftConfig.midLabel}
     </text>
 
-    <text x="15" y="175" class="dual-y-label">
+    <text x="52" y="170" text-anchor="end" class="dual-y-label">
       ${leftConfig.bottomLabel}
     </text>
   `;
@@ -819,15 +819,15 @@ function renderDualYLabels(
   document.getElementById(
     "rightYLabels"
   ).innerHTML = `
-    <text x="330" y="38" class="dual-y-label">
+   <text x="352" y="28" text-anchor="start" class="dual-y-label">
       ${rightConfig.topLabel}
     </text>
 
-    <text x="330" y="106" class="dual-y-label">
+    <text x="352" y="108" text-anchor="start" class="dual-y-label">
       ${rightConfig.midLabel}
     </text>
 
-    <text x="330" y="175" class="dual-y-label">
+    <text x="352" y="170" text-anchor="start" class="dual-y-label">
       ${rightConfig.bottomLabel}
     </text>
   `;
