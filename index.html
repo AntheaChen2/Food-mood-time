@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Food and Mood Tracker</title>
+  <title>心情好食光</title>
   <link rel="stylesheet" href="style.css" />
       </head>
       <body>
@@ -111,7 +111,11 @@
               <span class="mood-color body"></span>
               <small>身體狀態</small>
             </div>
-            <span>😊</span>
+            <img
+              class="mood-tab-icon"
+              data-icon-target="body"
+              src="emoji/Body4.png"
+            />
           </button>
 
           <button data-mood="mood" class="mood-tab">
@@ -119,7 +123,11 @@
               <span class="mood-color mood"></span>
               <small>心情</small>
             </div>
-            <span>😄</span>
+            <img
+              class="mood-tab-icon"
+              data-icon-target="mood"
+              src="emoji/Mood4.png"
+            />
           </button>
 
           <button data-mood="stress" class="mood-tab">
@@ -127,15 +135,40 @@
               <span class="mood-color stress"></span>
               <small>壓力</small>
             </div>
-            <span>😰</span>
+            <img
+              class="mood-tab-icon"
+              data-icon-target="stress"
+              src="emoji/Stress4.png"
+            />
           </button>
         </div>
         <div class="trend-area">
           <div class="trend-labels"><span>早餐</span><span>午餐</span><span>晚餐</span><span>零食</span></div>
-          <svg class="trend-chart" viewBox="0 0 240 100" preserveAspectRatio="none">
+          <svg class="trend-chart" viewBox="0 0 240 100" preserveAspectRatio="xMidYMid meet">
+              <!-- Y labels -->
+              <text
+                  id="trendTopLabel"
+                  x="6"
+                  y="0"
+                  class="trend-y-label"
+                  text-anchor="end"
+                >
+                  活力滿滿
+              </text>
+
+              <text
+                  id="trendBottomLabel"
+                  x="6"
+                  y="125"
+                  class="trend-y-label"
+                  text-anchor="end"
+                >
+                  疲憊
+              </text>
+
             <!-- axis first, so it stays behind -->
             <line x1="0" y1="60" x2="240" y2="60" class="axis axis-x" />
-            <line x1="0" y1="20" x2="0" y2="100" class="axis axis-y" />
+            <line x1="0" y1="5" x2="0" y2="115" class="axis axis-y" />
 
             <!-- trend lines after axis -->
             <polyline id="beforeTrend" points="" class="trend-line before" />
@@ -195,7 +228,13 @@
         </div>
 
         <div class="physical-item">
-          <span class="physical-icon">😩</span>
+          <img
+            class="physical-icon-image"
+            id="stressPhysicalIcon"
+            src="emoji/stress2.png"
+            alt="Stress Icon"
+          />
+
           <strong id="stressScore">--</strong>
           <small>壓力分數</small>
         </div>
