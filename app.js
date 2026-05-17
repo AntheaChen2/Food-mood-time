@@ -151,10 +151,9 @@ function valueToChartY(value) {
   return baselineY - (safeValue - 3) * step;
 }
 
-const moodEmojis = ["😭", "🙁", "😐", "😊", "😄"];
-
-function getMoodEmoji(value) {
-  return moodEmojis[Math.max(1, Math.min(5, value || 3)) - 1];
+function getMoodIcon(value) {
+  const safeValue = Math.max(1, Math.min(5, Number(value || 3)));
+  return `emoji/Mood${safeValue}.png`;
 }
 
 function getMealCardSummary(entry) {
@@ -163,7 +162,7 @@ function getMealCardSummary(entry) {
   const moodBefore = entry.mood?.moodBefore ?? 3;
   const moodAfter = entry.mood?.moodAfter ?? 3;
 
-return `
+  return `
     <div class="meal-change-panel">
       <div class="change-pill">
         <span class="change-label">飢餓</span>
@@ -171,11 +170,12 @@ return `
         <span class="arrow">→</span>
         <strong>${hungerAfter}</strong>
       </div>
+
       <div class="change-pill">
         <span class="change-label">心情</span>
-        <span style="font-size: 14px;">${getMoodEmoji(moodBefore)}</span>
+        <img class="meal-mood-icon" src="${getMoodIcon(moodBefore)}" alt="" />
         <span class="arrow">→</span>
-        <span style="font-size: 14px;">${getMoodEmoji(moodAfter)}</span>
+        <img class="meal-mood-icon" src="${getMoodIcon(moodAfter)}" alt="" />
       </div>
     </div>
   `;
@@ -218,6 +218,18 @@ async function loadSupabaseEntries() {
     const context = row.meal_contexts?.[0];
 
     console.log('Entry', row.id, 'eaten_at:', row.eaten_at, 'date:', new Date(row.eaten_at));
+    console.log("Mood check:", {
+      foodLogId: row.id,
+      mealType: row.meal_type,
+      before,
+      after,
+      bodyBefore: before?.body_status,
+      bodyAfter: after?.body_status,
+      moodBefore: before?.mood_level,
+      moodAfter: after?.mood_level,
+      stressBefore: before?.stress_level,
+      stressAfter: after?.stress_level
+});
 
     return {
       id: row.id,
@@ -436,79 +448,68 @@ function renderFoodGroups(entries) {
   const foodGroups = document.getElementById("foodGroups");
   const items = entries.flatMap(entry => entry.items || []);
 
-  if (!items.length) {
-    foodGroups.innerHTML = `<div>尚無食物資料</div>`;
-    return;
-  }
+  const colorOrder = [
+    { key: "green", label: "無" },
+    { key: "yellow", label: "無" },
+    { key: "orange", label: "無" }
+  ];
 
   const totalCalories = items.reduce(
     (sum, item) => sum + Number(item.calories || 0),
     0
   );
 
-  const colorOrder = [
-    { key: "green", label: "多吃" },
-    { key: "yellow", label: "適量" },
-    { key: "orange", label: "偶爾吃" }
-  ];
+  foodGroups.innerHTML = colorOrder
+    .map(({ key, label }) => {
+      const colorItems = items.filter(
+        item => item.color_category === key
+      );
 
-  foodGroups.innerHTML = `
-    <div class="food-legend">
-      <span><i class="dot green"></i>多吃</span>
-      <span><i class="dot yellow"></i>適量</span>
-      <span><i class="dot orange"></i>偶爾吃</span>
-    </div>
+      const colorCalories = colorItems.reduce(
+        (sum, item) => sum + Number(item.calories || 0),
+        0
+      );
 
-    ${colorOrder
-      .map(({ key, label }) => {
-        const colorItems = items.filter(
-          item => item.color_category === key
-        );
+      const ratio = totalCalories
+        ? (colorCalories / totalCalories) * 100
+        : 0;
 
-        const colorCalories = colorItems.reduce(
-          (sum, item) => sum + Number(item.calories || 0),
-          0
-        );
+      const barHeight = items.length
+        ? Math.max((ratio / 100) * 44, 8)
+        : 44;
 
-        const ratio = totalCalories
-          ? (colorCalories / totalCalories) * 100
-          : 0;
+      const names = colorItems
+        .map(
+          item =>
+            item.original_food ||
+            item.matched_name ||
+            item.search_name
+        )
+        .filter(Boolean)
+        .join("、");
 
-        const barHeight = Math.max((ratio / 100) * 44, 8);
-
-        const names = colorItems
-          .map(
-            item =>
-              item.original_food ||
-              item.matched_name ||
-              item.search_name
-          )
-          .filter(Boolean)
-          .join("、");
-
-        return `
-          <div class="food-color-row">
-
-            <div class="food-color-bar-track">
-              <div
-                class="food-color-bar ${key}"
-                style="height:${barHeight}px"
-              ></div>
-            </div>
-
-            <div class="food-color-text">
-              <strong>${names || label}</strong>
-            </div>
-
+      return `
+        <div class="food-color-row">
+          <div class="food-color-bar-track">
+            <div
+              class="food-color-bar ${key}"
+              style="height:${barHeight}px"
+            ></div>
           </div>
-        `;
-      })
-      .join("")}
-  `;
+
+          <div class="food-color-text">
+            <strong>${names || label}</strong>
+          </div>
+        </div>
+      `;
+    })
+    .join("");
 }
 
 function renderMoodTrend() {
   updateTrendColors();
+  updateTrendAxisLabels();
+  updateMoodTabEmojis();
   document.querySelectorAll(".mood-tab").forEach(button => {
     button.classList.toggle(
       "active",
@@ -612,28 +613,122 @@ function buildSingleTrendLine(entries, key) {
 
 
 
-function updateMoodTabEmojis(entriesByMeal) {
-  const visibleEntries = entriesByMeal.filter(Boolean);
-  const latestEntry = visibleEntries[visibleEntries.length - 1];
+const moodIconSets = {
+  body: [
+    "emoji/Body1.png",
+    "emoji/Body2.png",
+    "emoji/Body3.png",
+    "emoji/Body4.png",
+    "emoji/Body5.png"
+  ],
+  mood: [
+    "emoji/Mood1.png",
+    "emoji/Mood2.png",
+    "emoji/Mood3.png",
+    "emoji/Mood4.png",
+    "emoji/Mood5.png"
+  ],
+  stress: [
+    "emoji/Stress1.png",
+    "emoji/Stress2.png",
+    "emoji/Stress3.png",
+    "emoji/Stress4.png",
+    "emoji/Stress5.png"
+  ]
+};
 
-  if (!latestEntry) {
-    document.querySelector('[data-mood="body"] > span:not(.mood-color)').textContent = "😊";
-    document.querySelector('[data-mood="mood"] > span:not(.mood-color)').textContent = "😄";
-    document.querySelector('[data-mood="stress"] > span:not(.mood-color)').textContent = "😰";
-    return;
+const labelMap = {
+  body: {
+    top: "活力滿滿",
+    bottom: "疲憊"
+  },
+  mood: {
+    top: "很開心",
+    bottom: "很不開心"
+  },
+  stress: {
+    top: "壓力很大",
+    bottom: "沒有壓力"
   }
+};
 
-  const bodyAfter = latestEntry.mood?.bodyAfter ?? 3;
-  const moodAfter = latestEntry.mood?.moodAfter ?? 3;
-  const stressAfter = latestEntry.mood?.stressAfter ?? 3;
+function updateTrendAxisLabels() {
+  const labels = labelMap[state.selectedMoodFilter];
 
-  const bodyEmoji = ["😵", "😪", "🙂", "💪", "⚡"][bodyAfter - 1];
-  const moodEmoji = ["😭", "🙁", "😐", "😊", "😄"][moodAfter - 1];
-  const stressEmoji = ["😫", "😟", "😐", "😌", "🧘"][stressAfter - 1];
+  document.getElementById("trendTopLabel").textContent =
+    labels.top;
 
-  document.querySelector('[data-mood="body"] > span:not(.mood-color)').textContent = bodyEmoji;
-  document.querySelector('[data-mood="mood"] > span:not(.mood-color)').textContent = moodEmoji;
-  document.querySelector('[data-mood="stress"] > span:not(.mood-color)').textContent = stressEmoji;
+  document.getElementById("trendBottomLabel").textContent =
+    labels.bottom;
+}
+
+function getAverageMetric(type) {
+
+  const entries = state.entries.filter(entry => {
+    return entry.mood;
+  });
+
+  if (!entries.length) return 3;
+
+  let values = [];
+
+  entries.forEach(entry => {
+
+    if (type === "body") {
+      if (entry.mood?.bodyBefore)
+        values.push(entry.mood.bodyBefore);
+
+      if (entry.mood?.bodyAfter)
+        values.push(entry.mood.bodyAfter);
+    }
+
+    if (type === "mood") {
+      if (entry.mood?.moodBefore)
+        values.push(entry.mood.moodBefore);
+
+      if (entry.mood?.moodAfter)
+        values.push(entry.mood.moodAfter);
+    }
+
+    if (type === "stress") {
+      if (entry.mood?.stressBefore)
+        values.push(entry.mood.stressBefore);
+
+      if (entry.mood?.stressAfter)
+        values.push(entry.mood.stressAfter);
+    }
+
+  });
+
+  if (!values.length) return 3;
+
+  const avg =
+    values.reduce((a, b) => a + b, 0) / values.length;
+
+  return Math.round(avg);
+}
+
+function clampScale(value) {
+  return Math.max(1, Math.min(5, Number(value || 3)));
+}
+
+function updateMoodTabEmojis() {
+
+  const bodyAvg = getAverageMetric("body");
+  const moodAvg = getAverageMetric("mood");
+  const stressAvg = getAverageMetric("stress");
+
+  document.querySelector(
+    '[data-icon-target="body"]'
+  ).src = moodIconSets.body[bodyAvg - 1];
+
+  document.querySelector(
+    '[data-icon-target="mood"]'
+  ).src = moodIconSets.mood[moodAvg - 1];
+
+  document.querySelector(
+    '[data-icon-target="stress"]'
+  ).src = moodIconSets.stress[stressAvg - 1];
 }
 
 function updateTrendColors() {
@@ -795,59 +890,6 @@ async function initHome() {
 }
 
 initHome();
-
-function getWeatherIcon(weatherCode) {
-  if (weatherCode === 0) return "☀️";
-  if ([1, 2].includes(weatherCode)) return "🌤️";
-  if (weatherCode === 3) return "☁️";
-  if ([45, 48].includes(weatherCode)) return "🌫️";
-  if ([51, 53, 55, 56, 57].includes(weatherCode)) return "🌦️";
-  if ([61, 63, 65, 66, 67, 80, 81, 82].includes(weatherCode)) return "🌧️";
-  if ([71, 73, 75, 77, 85, 86].includes(weatherCode)) return "❄️";
-  if ([95, 96, 99].includes(weatherCode)) return "⛈️";
-
-  return "🌡️";
-}
-
-async function loadLocalWeather() {
-  const weatherIcon = document.getElementById("weatherIcon");
-
-  if (!weatherIcon) return;
-
-  if (!navigator.geolocation) {
-    weatherIcon.textContent = "☀️";
-    return;
-  }
-
-  navigator.geolocation.getCurrentPosition(
-    async position => {
-      const latitude = position.coords.latitude;
-      const longitude = position.coords.longitude;
-
-      console.log("Latitude:", latitude);
-      console.log("Longitude:", longitude);
-
-      try {
-        const response = await fetch(
-          `https://api.open-meteo.com/v1/forecast?latitude=${latitude}&longitude=${longitude}&current=weather_code`
-        );
-
-        const data = await response.json();
-
-        console.log("Weather API response:", data);
-
-        weatherIcon.textContent = getWeatherIcon(data.current.weather_code);
-      } catch (error) {
-        console.error("Weather API error:", error);
-        weatherIcon.textContent = "☀️";
-      }
-    },
-    error => {
-      console.error("Location error:", error);
-      weatherIcon.textContent = "☀️";
-    }
-  );
-}
 
 let isEditingNotes = false;
 
