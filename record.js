@@ -31,11 +31,11 @@ const iconSets = {
     {icon: "emoji/Mood5.png", label: '很開心'}
   ],
   stress: [
-    {icon: "emoji/Stress1.png", label: '沒有壓力'},
-    {icon: "emoji/Stress2.png", label: ''},
-    {icon: "emoji/Stress3.png", label: ''},
-    {icon: "emoji/Stress4.png", label: ''},
-    {icon: "emoji/Stress5.png", label: '壓力很大'}
+    {icon: "emoji/stress1.png", label: '沒有壓力'},
+    {icon: "emoji/stress2.png", label: ''},
+    {icon: "emoji/stress3.png", label: ''},
+    {icon: "emoji/stress4.png", label: ''},
+    {icon: "emoji/stress5.png", label: '壓力很大'}
   ]
 };
 
