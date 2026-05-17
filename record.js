@@ -12,13 +12,31 @@ const tagOptions = {
   whyEat: ['肚子餓', '嘴饞', '社交', '美食', '時間到了', '壓力'],
   whoEatWith: ['自己', '朋友', '家人', '同學', '愛人'],
   whereEat: ['宿舍', '家裡', '餐廳', '教室', '咖啡廳'],
-  activities: ['滑手機', '看影片', '看電視', '聊天', '閱讀']
+  activities: ['滑手機', '看影片', '看電視','用電腦', '聊天', '閱讀']
 };
 
-const emojiSets = {
-  body: ['😵', '😪', '🙂', '💪', '⚡'],
-  mood: ['😭', '🙁', '😐', '😊', '😄'],
-  stress: ['😫', '😟', '😐', '😌', '🧘']
+const iconSets = {
+  body: [
+    {icon: "emoji/Body1.png", label: '疲憊'},
+    {icon: "emoji/Body2.png", label: ''},
+    {icon: "emoji/Body3.png", label: ''},
+    {icon: "emoji/Body4.png", label: ''},
+    {icon: "emoji/Body5.png", label: '活力滿滿'}
+  ],
+  mood: [
+    {icon: "emoji/Mood1.png", label: '很不開心'},
+    {icon: "emoji/Mood2.png", label: ''},
+    {icon: "emoji/Mood3.png", label: ''},
+    {icon: "emoji/Mood4.png", label: ''},
+    {icon: "emoji/Mood5.png", label: '很開心'}
+  ],
+  stress: [
+    {icon: "emoji/Stress1.png", label: '沒有壓力'},
+    {icon: "emoji/Stress2.png", label: ''},
+    {icon: "emoji/Stress3.png", label: ''},
+    {icon: "emoji/Stress4.png", label: ''},
+    {icon: "emoji/Stress5.png", label: '壓力很大'}
+  ]
 };
 
 const requiredScaleFields = [
@@ -51,12 +69,53 @@ function formatDate(date = new Date()) {
 function formatTime(date = new Date()) {
   return `${pad(date.getHours())}:${pad(date.getMinutes())}`;
 }
+
+function setMealDateTime(date = new Date()) {
+  document.getElementById("mealDate").value = formatDate(date);
+  document.getElementById("mealTime").value = formatTime(date);
+}
+async function convertImageToJpeg(file, quality = 0.9) {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    const img = new Image();
+
+    reader.onload = () => {
+      img.onload = () => {
+        const canvas = document.createElement("canvas");
+        canvas.width = img.naturalWidth;
+        canvas.height = img.naturalHeight;
+
+        const ctx = canvas.getContext("2d");
+        ctx.drawImage(img, 0, 0);
+
+        canvas.toBlob(
+          blob => {
+            if (!blob) {
+              reject(new Error("Image conversion failed"));
+              return;
+            }
+
+            resolve(blob);
+          },
+          "image/jpeg",
+          quality
+        );
+      };
+
+      img.onerror = reject;
+      img.src = reader.result;
+    };
+
+    reader.onerror = reject;
+    reader.readAsDataURL(file);
+  });
+}
+
 function todayDate() { return formatDate(); }
 function nowTime() { return formatTime(); }
 
 function init() {
-  document.getElementById('mealDate').value = todayDate();
-  document.getElementById('mealTime').value = nowTime();
+  setMealDateTime(new Date());
   renderInputType();
   renderMealChoices();
   renderScales();
@@ -84,29 +143,28 @@ function bindEvents() {
     });
   });
 
-  document.getElementById('foodPhoto').addEventListener('change', event => {
+  document.getElementById("foodPhoto").addEventListener("change", async event => {
     const file = event.target.files?.[0];
     if (!file) return;
 
-    const fileDate = file.lastModified ? new Date(file.lastModified) : null;
-    if (fileDate && !Number.isNaN(fileDate.getTime())) {
-      document.getElementById('mealDate').value = formatDate(fileDate);
-      document.getElementById('mealTime').value = formatTime(fileDate);
-      hideError('dateError');
-      hideError('timeError');
+    const photoDate =
+      file.lastModified
+        ? new Date(file.lastModified)
+        : new Date();
+
+    if (!Number.isNaN(photoDate.getTime())) {
+      setMealDateTime(photoDate);
+      hideError("dateError");
+      hideError("timeError");
     }
 
-    const reader = new FileReader();
-    reader.onload = () => {
-      state.photoDataUrl = reader.result;
-      const preview = document.getElementById('photoPreview');
-      preview.src = state.photoDataUrl;
-      preview.classList.remove('hidden');
-      document.getElementById('uploadPlaceholder').classList.add('hidden');
-      hideError('photoError');
-      updateProgress();
-    };
-    reader.readAsDataURL(file);
+    const preview = document.getElementById("photoPreview");
+    preview.src = URL.createObjectURL(file);
+    preview.classList.remove("hidden");
+    document.getElementById("uploadPlaceholder").classList.add("hidden");
+
+    hideError("photoError");
+    updateProgress();
   });
 
   document.getElementById('foodText').addEventListener('input', () => {
@@ -172,8 +230,22 @@ function renderEmojiScales() {
   document.querySelectorAll('.emoji-scale').forEach(container => {
     const name = container.dataset.name;
     const kind = container.dataset.kind;
-    container.innerHTML = emojiSets[kind].map((emoji, index) => `
-      <button type="button" aria-label="${kind} ${index + 1}" data-value="${index + 1}">${emoji}</button>
+    container.innerHTML = iconSets[kind].map((item, index) => `
+      <div class="emoji-option">
+        <button
+          type="button"
+          aria-label="${kind} ${index + 1}"
+          data-value="${index + 1}"
+        >
+          <img
+            src="${item.icon}"
+            alt="${kind} ${index + 1}"
+            class="scale-icon"
+          />
+        </button>
+
+        <span class="emoji-label">${item.label}</span>
+      </div>
     `).join('');
     container.querySelectorAll('button').forEach(button => {
       button.addEventListener('click', () => {
@@ -347,15 +419,15 @@ if (!existingUser) {
   if (state.inputType === "photo") {
       const file = document.getElementById("foodPhoto").files[0];
 
-      mimeType = file.type || "image/jpeg";
+      mimeType = "image/jpeg";
 
-      const fileExt = file.name.split(".").pop();
+      const jpegBlob = await convertImageToJpeg(file, 0.9);
 
-      imagePath = `${currentUser.id}/${Date.now()}.${fileExt}`;
+      imagePath = `${currentUser.id}/${Date.now()}.jpg`;
 
       const { error: uploadError } = await db.storage
         .from("food-images")
-        .upload(imagePath, file, {
+        .upload(imagePath, jpegBlob, {
           contentType: mimeType
         });
 
