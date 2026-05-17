@@ -70,7 +70,7 @@ input:focus, textarea:focus { border-color: var(--accent-dark); box-shadow: 0 0 
 .state-group, .tag-block { padding-top: 13px; border-top: 1px solid rgba(0,0,0,.07); margin-top: 13px; }
 .state-group:first-of-type, .tag-block:first-of-type { border-top: 0; margin-top: 0; padding-top: 0; }
 
-.emoji-scale { display: flex; justify-content: space-between; gap: 6px; }
+.emoji-scale { display: flex; justify-content: space-between; align-items: flex-start;gap: 6px; }
 .emoji-scale button { width: 52px; height: 52px; border-radius: 999px; border: 1px solid transparent; background: #f4f1ec; font-size: 23px; transition: transform .12s ease; }
 .emoji-scale button:active { transform: scale(.95); }
 
@@ -90,4 +90,32 @@ input:focus, textarea:focus { border-color: var(--accent-dark); box-shadow: 0 0 
   .emoji-scale button { width: 46px; height: 46px; font-size: 21px; }
   .scale button { width: 39px; height: 39px; }
   .choice, .tag { padding-inline: 11px; }
+}
+
+.scale-icon {
+  width: 55px;
+  height: 55px;
+  object-fit: contain;
+  display: block;
+}
+
+.emoji-scale button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.emoji-option {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+}
+
+.emoji-label {
+  font-size: 12px;
+  color: var(--muted);
+  font-weight: 400;
+  text-align: center;
+  line-height: 1.2;
 }
