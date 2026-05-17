@@ -629,11 +629,11 @@ const moodIconSets = {
     "emoji/Mood5.png"
   ],
   stress: [
-    "emoji/Stress1.png",
-    "emoji/Stress2.png",
-    "emoji/Stress3.png",
-    "emoji/Stress4.png",
-    "emoji/Stress5.png"
+    "emoji/stress1.png",
+    "emoji/stress2.png",
+    "emoji/stress3.png",
+    "emoji/stress4.png",
+    "emoji/stress5.png"
   ]
 };
 
