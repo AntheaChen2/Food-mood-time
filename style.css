@@ -82,7 +82,7 @@ h2 { margin: 0; font-size: 16px; font-weight: 600; }
 .trend-labels { display: flex; justify-content: space-around; color: var(--muted); font-size: 12px; margin-bottom: 8px; }
 .trend-chart { width: 100%; height: 100px; display: block; }
 .axis { stroke: #e5e7eb; stroke-width: 1; }
-.axis-label { font-size: 10px; fill: var(--muted); }
+.axis-label { font-size: 12px; fill: var(--muted); }
 .trend-line { fill: none; stroke-width: 3; stroke-linecap: round; stroke-linejoin: round; }
 .trend-line.before { stroke: var(--yellow); }
 .trend-line.after { stroke: var(--orange); }
@@ -456,7 +456,7 @@ h2 { margin: 0; font-size: 16px; font-weight: 600; }
 
 .axis {
   stroke: #d9dde3;
-  stroke-width: 1.2;
+  stroke-width: 1.8;
 }
 
 .trend-line.before {
@@ -1126,7 +1126,7 @@ h2 { margin: 0; font-size: 16px; font-weight: 600; }
 }
 
 .trend-y-label {
-  font-size: 7px;
+  font-size: 9px;
   font-weight: 600;
   fill: #8d8f9b;
 }
