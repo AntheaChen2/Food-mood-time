@@ -77,81 +77,87 @@ function setMealDateTime(date = new Date()) {
 }
 
 async function convertImageToJpeg(file, quality = 0.9) {
-
-  let processedFile = file;
+  const fileName = file.name.toLowerCase();
 
   const isHeic =
     file.type === "image/heic" ||
     file.type === "image/heif" ||
-    file.name.toLowerCase().endsWith(".heic");
+    fileName.endsWith(".heic") ||
+    fileName.endsWith(".heif");
 
-  // HEIC → JPEG
+  const isJpeg =
+    file.type === "image/jpeg" ||
+    fileName.endsWith(".jpg") ||
+    fileName.endsWith(".jpeg");
+
+  // JPG/JPEG 不要再轉，避免 canvas 轉黑
+  if (isJpeg) {
+    return new File(
+      [file],
+      file.name.replace(/\.[^.]+$/, ".jpg"),
+      { type: "image/jpeg" }
+    );
+  }
+
+  // HEIC 才用 heic2any
   if (isHeic) {
-
     const convertedBlob = await heic2any({
       blob: file,
       toType: "image/jpeg",
       quality
     });
 
-    processedFile = new File(
+    return new File(
       [convertedBlob],
       file.name.replace(/\.[^.]+$/, ".jpg"),
-      {
-        type: "image/jpeg"
-      }
+      { type: "image/jpeg" }
     );
   }
 
+  // PNG / WEBP 才用 canvas，且先鋪白底，避免透明變黑
   return new Promise((resolve, reject) => {
-
-    const reader = new FileReader();
     const img = new Image();
+    const objectUrl = URL.createObjectURL(file);
 
-    reader.onload = () => {
+    img.onload = () => {
+      const canvas = document.createElement("canvas");
+      canvas.width = img.naturalWidth;
+      canvas.height = img.naturalHeight;
 
-      img.onload = () => {
+      const ctx = canvas.getContext("2d");
 
-        const canvas = document.createElement("canvas");
+      ctx.fillStyle = "#ffffff";
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+      ctx.drawImage(img, 0, 0);
 
-        canvas.width = img.naturalWidth;
-        canvas.height = img.naturalHeight;
+      canvas.toBlob(
+        blob => {
+          URL.revokeObjectURL(objectUrl);
 
-        const ctx = canvas.getContext("2d");
+          if (!blob) {
+            reject(new Error("Image conversion failed"));
+            return;
+          }
 
-        ctx.drawImage(img, 0, 0);
-
-        canvas.toBlob(
-          blob => {
-
-            if (!blob) {
-              reject(new Error("Image conversion failed"));
-              return;
-            }
-
-            const jpegFile = new File(
+          resolve(
+            new File(
               [blob],
-              processedFile.name.replace(/\.[^.]+$/, ".jpg"),
-              {
-                type: "image/jpeg"
-              }
-            );
-
-            resolve(jpegFile);
-          },
-          "image/jpeg",
-          quality
-        );
-      };
-
-      img.onerror = reject;
-
-      img.src = reader.result;
+              file.name.replace(/\.[^.]+$/, ".jpg"),
+              { type: "image/jpeg" }
+            )
+          );
+        },
+        "image/jpeg",
+        quality
+      );
     };
 
-    reader.onerror = reject;
+    img.onerror = () => {
+      URL.revokeObjectURL(objectUrl);
+      reject(new Error("Image load failed"));
+    };
 
-    reader.readAsDataURL(processedFile);
+    img.src = objectUrl;
   });
 }
 
