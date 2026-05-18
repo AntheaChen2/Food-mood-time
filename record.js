@@ -51,7 +51,8 @@ const state = {
   mealType: new URLSearchParams(location.search).get('meal') || localStorage.getItem('default_meal_type') || inferMealType(new Date()),
   selected: {},
   multi: { whyEat: [], whoEatWith: [], whereEat: [], activities: [] },
-  photoDataUrl: ''
+  photoDataUrl: '',
+  photoFile: null
 };
 
 function inferMealType(date) {
@@ -74,28 +75,69 @@ function setMealDateTime(date = new Date()) {
   document.getElementById("mealDate").value = formatDate(date);
   document.getElementById("mealTime").value = formatTime(date);
 }
+
 async function convertImageToJpeg(file, quality = 0.9) {
+
+  let processedFile = file;
+
+  const isHeic =
+    file.type === "image/heic" ||
+    file.type === "image/heif" ||
+    file.name.toLowerCase().endsWith(".heic");
+
+  // HEIC → JPEG
+  if (isHeic) {
+
+    const convertedBlob = await heic2any({
+      blob: file,
+      toType: "image/jpeg",
+      quality
+    });
+
+    processedFile = new File(
+      [convertedBlob],
+      file.name.replace(/\.[^.]+$/, ".jpg"),
+      {
+        type: "image/jpeg"
+      }
+    );
+  }
+
   return new Promise((resolve, reject) => {
+
     const reader = new FileReader();
     const img = new Image();
 
     reader.onload = () => {
+
       img.onload = () => {
+
         const canvas = document.createElement("canvas");
+
         canvas.width = img.naturalWidth;
         canvas.height = img.naturalHeight;
 
         const ctx = canvas.getContext("2d");
+
         ctx.drawImage(img, 0, 0);
 
         canvas.toBlob(
           blob => {
+
             if (!blob) {
               reject(new Error("Image conversion failed"));
               return;
             }
 
-            resolve(blob);
+            const jpegFile = new File(
+              [blob],
+              processedFile.name.replace(/\.[^.]+$/, ".jpg"),
+              {
+                type: "image/jpeg"
+              }
+            );
+
+            resolve(jpegFile);
           },
           "image/jpeg",
           quality
@@ -103,11 +145,13 @@ async function convertImageToJpeg(file, quality = 0.9) {
       };
 
       img.onerror = reject;
+
       img.src = reader.result;
     };
 
     reader.onerror = reject;
-    reader.readAsDataURL(file);
+
+    reader.readAsDataURL(processedFile);
   });
 }
 
@@ -143,29 +187,39 @@ function bindEvents() {
     });
   });
 
-  document.getElementById("foodPhoto").addEventListener("change", async event => {
-    const file = event.target.files?.[0];
-    if (!file) return;
+document.getElementById("foodPhoto").addEventListener("change", async event => {
+  const file = event.target.files?.[0];
+  if (!file) return;
 
-    const photoDate =
-      file.lastModified
-        ? new Date(file.lastModified)
-        : new Date();
+  const photoDate = file.lastModified
+    ? new Date(file.lastModified)
+    : new Date();
 
-    if (!Number.isNaN(photoDate.getTime())) {
-      setMealDateTime(photoDate);
-      hideError("dateError");
-      hideError("timeError");
-    }
+  if (!Number.isNaN(photoDate.getTime())) {
+    setMealDateTime(photoDate);
+    hideError("dateError");
+    hideError("timeError");
+  }
+
+  try {
+    const jpegFile = await convertImageToJpeg(file, 0.9);
+
+    state.photoFile = jpegFile;
+    state.photoDataUrl = URL.createObjectURL(jpegFile);
 
     const preview = document.getElementById("photoPreview");
-    preview.src = URL.createObjectURL(file);
+    preview.src = state.photoDataUrl;
     preview.classList.remove("hidden");
+
     document.getElementById("uploadPlaceholder").classList.add("hidden");
 
     hideError("photoError");
     updateProgress();
-  });
+  } catch (error) {
+    console.error(error);
+    alert("照片讀取失敗，請改用 JPG 或重新選擇照片");
+  }
+});
 
   document.getElementById('foodText').addEventListener('input', () => {
     hideError('textError');
@@ -416,32 +470,36 @@ if (!existingUser) {
   let imageUrl = null;
   let mimeType = null;
 
-  if (state.inputType === "photo") {
-      const file = document.getElementById("foodPhoto").files[0];
+ if (state.inputType === "photo") {
 
-      mimeType = "image/jpeg";
+  const file = state.photoFile;
 
-      const jpegBlob = await convertImageToJpeg(file, 0.9);
-
-      imagePath = `${currentUser.id}/${Date.now()}.jpg`;
-
-      const { error: uploadError } = await db.storage
-        .from("food-images")
-        .upload(imagePath, jpegBlob, {
-          contentType: mimeType
-        });
-
-      if (uploadError) {
-        alert(uploadError.message);
-        return;
-      }
-
-      const { data: publicUrlData } = db.storage
-        .from("food-images")
-        .getPublicUrl(imagePath);
-
-      imageUrl = publicUrlData.publicUrl;
+  if (!file) {
+    alert("請上傳照片");
+    return;
   }
+
+  mimeType = "image/jpeg";
+
+  imagePath = `${currentUser.id}/${Date.now()}.jpg`;
+
+  const { error: uploadError } = await db.storage
+    .from("food-images")
+    .upload(imagePath, file, {
+      contentType: mimeType
+    });
+
+  if (uploadError) {
+    alert(uploadError.message);
+    return;
+  }
+
+  const { data: publicUrlData } = db.storage
+    .from("food-images")
+    .getPublicUrl(imagePath);
+
+  imageUrl = publicUrlData.publicUrl;
+}
 
   const { data: foodLog, error: foodLogError } = await db
     .from("food_logs")
