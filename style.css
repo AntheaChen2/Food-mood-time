@@ -80,7 +80,7 @@ h2 { margin: 0; font-size: 16px; font-weight: 600; }
 .mood-card { display: flex; gap: 16px; }
 .trend-area { flex: 1; min-width: 0; position: relative; }
 .trend-labels { display: flex; justify-content: space-around; color: var(--muted); font-size: 12px; margin-bottom: 8px; }
-.trend-chart { width: 100%; height: 100px; display: block; }
+.trend-chart { width: 100%; height: 140px; display: block; overflow: visible; }
 .axis { stroke: #e5e7eb; stroke-width: 1; }
 .axis-label { font-size: 12px; fill: var(--muted); }
 .trend-line { fill: none; stroke-width: 3; stroke-linecap: round; stroke-linejoin: round; }
@@ -449,14 +449,14 @@ h2 { margin: 0; font-size: 16px; font-weight: 600; }
 
 .trend-chart {
   width: 100%;
-  height: 150px;
+  height: 140px; /* Increased from 100px to expand the layout canvas physically */
   display: block;
   overflow: visible;
 }
 
 .axis {
-  stroke: #d9dde3;
-  stroke-width: 1.8;
+  stroke: #c2c7ce;  /* Darkened slightly from #d9dde3 to improve view visibility */
+  stroke-width: 2;  /* Slightly thicker axis lines */
 }
 
 .trend-line.before {
@@ -1126,9 +1126,9 @@ h2 { margin: 0; font-size: 16px; font-weight: 600; }
 }
 
 .trend-y-label {
-  font-size: 9px;
-  font-weight: 600;
-  fill: #8d8f9b;
+  font-size: 11px; /* Scaled up from 9px for high readability */
+  font-weight: 500; /* Bolder styling weight */
+  fill: #555964;    /* Deeper contrast color so users can read it clearly */
 }
 
 .trend-chart {
