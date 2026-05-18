@@ -138,46 +138,42 @@
             <img
               class="mood-tab-icon"
               data-icon-target="stress"
-              src="emoji/Stress4.png"
+              src="emoji/stress4.png"
             />
           </button>
         </div>
         <div class="trend-area">
           <div class="trend-labels"><span>早餐</span><span>午餐</span><span>晚餐</span><span>零食</span></div>
-          <svg class="trend-chart" viewBox="0 0 240 100" preserveAspectRatio="xMidYMid meet">
-              <!-- Y labels -->
-              <text
-                  id="trendTopLabel"
-                  x="6"
-                  y="0"
-                  class="trend-y-label"
-                  text-anchor="end"
-                >
-                  活力滿滿
-              </text>
+            <svg class="trend-chart" viewBox="0 0 240 135" preserveAspectRatio="xMidYMid meet">
+                <line x1="0" y1="84" x2="240" y2="84" class="axis axis-x" />
+                <line x1="0" y1="15" x2="0" y2="155" class="axis axis-y" />
 
-              <text
-                  id="trendBottomLabel"
-                  x="6"
-                  y="125"
-                  class="trend-y-label"
-                  text-anchor="end"
-                >
-                  疲憊
-              </text>
+                <text
+                    id="trendTopLabel"
+                    x="-15"
+                    y="12"
+                    class="trend-y-label"
+                    text-anchor="start"
+                  >
+                    活力滿滿
+                </text>
 
-            <!-- axis first, so it stays behind -->
-            <line x1="0" y1="60" x2="240" y2="60" class="axis axis-x" />
-            <line x1="0" y1="5" x2="0" y2="115" class="axis axis-y" />
+                <text
+                    id="trendBottomLabel"
+                    x="-15"
+                    y="165"
+                    class="trend-y-label"
+                    text-anchor="start"
+                  >
+                    疲憊
+                </text>
 
-            <!-- trend lines after axis -->
-            <polyline id="beforeTrend" points="" class="trend-line before" />
-            <polyline id="afterTrend" points="" class="trend-line after" />
+                <polyline id="beforeTrend" points="" class="trend-line before" />
+                <polyline id="afterTrend" points="" class="trend-line after" />
 
-            <!-- dots last, so they stay on top -->
-            <circle id="beforeDot" cx="0" cy="0" r="0" class="trend-dot before-dot" />
-            <circle id="afterDot" cx="0" cy="0" r="0" class="trend-dot after-dot" />
-          </svg>
+                <circle id="beforeDot" cx="0" cy="0" r="0" class="trend-dot before-dot" />
+                <circle id="afterDot" cx="0" cy="0" r="0" class="trend-dot after-dot" />
+            </svg>
           <div class="trend-legend">
             <div class="legend-item">
               <span class="legend-dot before"></span>
