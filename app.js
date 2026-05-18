@@ -144,10 +144,11 @@ async function loadLocalWeather() {
 }
 
 function valueToChartY(value) {
-  const baselineY = 60;
-  const step = 18;
+  const baselineY = 84; // 這裡精準對齊你 HTML 中的 y1="84" y2="84"
+  const step = 32;      // 因為你的 Y 軸拉長到 155，我們把間距放大到 32，這樣 1~5 分的分佈會更完美、更拉伸
   const safeValue = Number(value || 3);
 
+  // 當 safeValue 是 3 時，(3 - 3) * 32 = 0，回傳值就是 84（完美壓在 X 軸上！）
   return baselineY - (safeValue - 3) * step;
 }
 
@@ -629,11 +630,11 @@ const moodIconSets = {
     "emoji/Mood5.png"
   ],
   stress: [
-    "emoji/stress1.png",
-    "emoji/stress2.png",
-    "emoji/stress3.png",
-    "emoji/stress4.png",
-    "emoji/stress5.png"
+    "emoji/Stress1.png",
+    "emoji/Stress2.png",
+    "emoji/Stress3.png",
+    "emoji/Stress4.png",
+    "emoji/Stress5.png"
   ]
 };
 
