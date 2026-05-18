@@ -1,5 +1,5 @@
-let insightStartDate = getSevenDaysAgoDate();
-let insightEndDate = getTodayDate();
+let insightStartDate = getDefaultReflectionStartDate();
+let insightEndDate = getDefaultReflectionEndDate();
 
 const currentUser = getMvpUser();
 
@@ -21,6 +21,63 @@ function getSevenDaysAgoDate() {
 
 function getTodayDate() {
   return getTaiwanDateString(new Date());
+}
+
+function getCurrentWeekMondayDate() {
+  const today = new Date();
+  const day = today.getDay();
+
+  const diffToMonday = day === 0 ? -6 : 1 - day;
+
+  today.setDate(today.getDate() + diffToMonday);
+
+  return getTaiwanDateString(today);
+}
+
+function getPreviousWeekMondayDate() {
+  const today = new Date();
+  const day = today.getDay();
+
+  const diffToThisMonday = day === 0 ? -6 : 1 - day;
+  today.setDate(today.getDate() + diffToThisMonday - 7);
+
+  return getTaiwanDateString(today);
+}
+
+function isTodayMonday() {
+  return new Date().getDay() === 1;
+}
+
+function getDefaultReflectionStartDate() {
+  return isTodayMonday()
+    ? getPreviousWeekMondayDate()
+    : getCurrentWeekMondayDate();
+}
+
+function getDefaultReflectionEndDate() {
+  return getDateAfterDays(getDefaultReflectionStartDate(), 6);
+}
+
+function formatShortDate(dateString) {
+  const date = new Date(`${dateString}T00:00:00+08:00`);
+  return `${date.getMonth() + 1}/${date.getDate()}`;
+}
+
+function updateReflectionRangeLabel() {
+  const label = document.getElementById("reflectionRangeLabel");
+  if (!label) return;
+
+  const rangeText = `${formatShortDate(insightStartDate)}–${formatShortDate(insightEndDate)}`;
+
+  label.textContent = isTodayMonday()
+    ? `上週回顧：${rangeText}`
+    : `本週目前：${rangeText}`;
+}
+
+function getDateAfterDays(dateString, days) {
+  const date = new Date(`${dateString}T00:00:00+08:00`);
+  date.setDate(date.getDate() + days);
+  return getTaiwanDateString(date);
 }
 
 function getPublicImageUrl(path) {
@@ -92,7 +149,7 @@ function renderMealCards(containerId, meals) {
   const container = document.getElementById(containerId);
 
   if (!meals.length) {
-    container.innerHTML = `<p class="empty-insight">過去七天尚無符合條件的餐點</p>`;
+    container.innerHTML = `<p class="empty-insight">本週尚無符合條件的餐點</p>`;
     return;
   }
 
@@ -576,8 +633,8 @@ async function loadWeeklyHealthLogs() {
     .from("daily_health_logs")
     .select("*")
     .eq("user_id", currentUser.id)
-    .gte("log_date", getSevenDaysAgoDate())
-    .lte("log_date", getTodayDate());
+    .gte("log_date", insightStartDate)
+    .lte("log_date", insightEndDate);
 
   if (error) {
     console.warn(error.message);
@@ -978,7 +1035,7 @@ async function setupDateRangeControls() {
   const startInput = document.getElementById("startDateInput");
   if (!startInput) return;
 
-  startInput.value = getSevenDaysAgoDate();
+  startInput.value = getDefaultReflectionStartDate();
 
   await updateDateRangeFromStartDate();
 
@@ -992,14 +1049,11 @@ async function updateDateRangeFromStartDate() {
   if (!startInput || !startInput.value) return;
 
   insightStartDate = startInput.value;
-
-  const start = new Date(`${insightStartDate}T00:00:00+08:00`);
-  const end = new Date(start);
-  end.setDate(start.getDate() + 6);
-
-  insightEndDate = getTaiwanDateString(end);
+  insightEndDate = getDateAfterDays(insightStartDate, 6);
 
   selectedDateKeys = [];
+
+  const start = new Date(`${insightStartDate}T00:00:00+08:00`);
 
   for (let i = 0; i < 7; i++) {
     const d = new Date(start);
@@ -1015,5 +1069,5 @@ async function updateDateRangeFromStartDate() {
 
   renderDualChart();
   renderInsightGroups(meals);
+  updateReflectionRangeLabel();
 }
-
