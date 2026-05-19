@@ -326,45 +326,100 @@ function renderMealCards() {
   const container = document.getElementById("mealCards");
   container.innerHTML = "";
 
-  mealTypes.forEach(({ type, label, matchTypes }) => {
-    const mealEntry = getGroupedMealEntry(matchTypes);
-    console.log('Meal', type, 'entry:', mealEntry ? mealEntry.id : null);
-    const button = document.createElement("button");
+  const todayEntries = state.entries
+    .filter(entry => isSameDay(entry.date, state.selectedDate))
+    .sort((a, b) => new Date(a.date) - new Date(b.date));
 
-    if (!mealEntry) {
-      button.className = "meal-card empty";
-      button.innerHTML = `
-        <span class="meal-label">${label}</span>
-        <span class="meal-add">新增</span>
-      `;
-      button.addEventListener("click", () => openRecordingPage(type));
-    } else if (mealEntry.type === "photo") {
-      button.className = `meal-card photo ${
-        state.selectedMealEntryId === mealEntry.id ? "selected" : ""
-      }`;
-      button.innerHTML = `
-        <img src="${mealEntry.content}" alt="${label}" />
-        <div class="meal-overlay">
-          ${getMealCardSummary(mealEntry)}
-        </div>
-      `;
-      button.addEventListener("click", () => toggleMealFilter(mealEntry.id));
+  const mealLabelMap = {
+    breakfast: "早餐",
+    lunch: "午餐",
+    dinner: "晚餐",
+    snacks: "零食",
+    drinks: "飲料"
+  };
+
+  const fixedMeals = [
+    { type: "breakfast", label: "早餐" },
+    { type: "lunch", label: "午餐" },
+    { type: "dinner", label: "晚餐" }
+  ];
+
+  // 早餐午餐晚餐
+  fixedMeals.forEach(({ type, label }) => {
+    const entry = todayEntries.find(entry => entry.mealType === type);
+
+    if (entry) {
+      renderMealCard(container, entry, label);
     } else {
-      button.className = `meal-card text ${
-        state.selectedMealEntryId === mealEntry.id ? "selected" : ""
-      }`;
-      button.innerHTML = `
-        <div class="meal-text-content">
-          <p>${mealEntry.content || "文字記錄"}</p>
-          ${getMealCardSummary(mealEntry)}
-        </div>
-      `;
-
-      button.addEventListener("click", () => toggleMealFilter(mealEntry.id));
+      renderEmptyMealCard(container, type, label);
     }
-
-    container.appendChild(button);
   });
+
+  // 所有零食/飲料紀錄
+  const snackEntries = todayEntries.filter(entry =>
+    ["snacks", "drinks"].includes(entry.mealType)
+  );
+
+  snackEntries.forEach(entry => {
+    renderMealCard(
+      container,
+      entry,
+      mealLabelMap[entry.mealType] || "餐點"
+    );
+  });
+
+  // 零食灰卡永遠放最後
+  renderEmptyMealCard(container, "snacks", "零食/飲料");
+}
+
+function renderEmptyMealCard(container, type, label) {
+  const button = document.createElement("button");
+
+  button.className = "meal-card empty";
+  button.innerHTML = `
+    <span class="meal-label">${label}</span>
+    <span class="meal-add">新增</span>
+  `;
+
+  button.addEventListener("click", () =>
+  openRecordingPage(type, "photo", state.selectedDate)
+);
+
+  container.appendChild(button);
+}
+
+function renderMealCard(container, entry, label) {
+  const button = document.createElement("button");
+
+  if (entry.type === "photo") {
+    button.className = `meal-card photo ${
+      state.selectedMealEntryId === entry.id ? "selected" : ""
+    }`;
+
+    button.innerHTML = `
+      <img src="${entry.content}" alt="${label}" />
+      <div class="meal-overlay">
+        <span class="meal-label">${label}</span>
+        ${getMealCardSummary(entry)}
+      </div>
+    `;
+  } else {
+    button.className = `meal-card text ${
+      state.selectedMealEntryId === entry.id ? "selected" : ""
+    }`;
+
+    button.innerHTML = `
+      <div class="meal-text-content">
+        <span class="meal-label">${label}</span>
+        <p>${entry.content || "文字記錄"}</p>
+        ${getMealCardSummary(entry)}
+      </div>
+    `;
+  }
+
+  button.addEventListener("click", () => toggleMealFilter(entry.id));
+
+  container.appendChild(button);
 }
 
 function toggleMealFilter(entryId) {
@@ -413,6 +468,7 @@ function renderNutrition() {
 
   renderFoodGroups(entries);
 }
+
 function renderNutritionDonut({ carbs, protein, fat, fiber }) {
   const segments = [
     { id: "carbsArc", value: carbs * 4 },
@@ -818,7 +874,7 @@ function renderContextAndNote() {
       .join("");
 }
 
-function openRecordingPage(defaultMealType, inputType = "photo") {
+function openRecordingPage(defaultMealType, inputType = "photo", selectedDate = state.selectedDate) {
   const validMealTypes = ["breakfast", "lunch", "dinner", "snacks", "drinks"];
   const params = new URLSearchParams();
 
@@ -833,6 +889,8 @@ function openRecordingPage(defaultMealType, inputType = "photo") {
 
   localStorage.setItem("record_input_type", inputType);
   params.set("type", inputType);
+
+  params.set("date", formatDateInputValue(selectedDate));
 
   location.href = `record.html?${params.toString()}`;
 }
@@ -953,6 +1011,12 @@ function formatSleep(minutes) {
 }
 
 function formatDateForSupabase(date) {
+  return date.toLocaleDateString("en-CA", {
+    timeZone: "Asia/Taipei"
+  });
+}
+
+function formatDateInputValue(date) {
   return date.toLocaleDateString("en-CA", {
     timeZone: "Asia/Taipei"
   });
