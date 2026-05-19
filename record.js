@@ -165,7 +165,15 @@ function todayDate() { return formatDate(); }
 function nowTime() { return formatTime(); }
 
 function init() {
+  const params = new URLSearchParams(location.search);
+const dateParam = params.get("date");
+
+if (dateParam) {
+  document.getElementById("mealDate").value = dateParam;
+  document.getElementById("mealTime").value = formatTime(new Date());
+} else {
   setMealDateTime(new Date());
+}
   renderInputType();
   renderMealChoices();
   renderScales();
