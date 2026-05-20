@@ -179,7 +179,7 @@ if (dateParam) {
   renderScales();
   renderEmojiScales();
   renderTags();
-  Events();
+  bindEvents();
   updateProgress();
 }
 
