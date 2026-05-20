@@ -179,13 +179,13 @@ if (dateParam) {
   renderScales();
   renderEmojiScales();
   renderTags();
-  bindEvents();
+  Events();
   updateProgress();
 }
 
 function bindEvents() {
   document.getElementById('backButton').addEventListener('click', () => location.href = 'index.html');
-  document.getElementById('saveTopButton').addEventListener('click', () => saveRecord());
+  
   document.getElementById('recordForm').addEventListener('submit', event => {
     event.preventDefault();
     saveRecord();
