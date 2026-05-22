@@ -375,6 +375,7 @@ async function renderTrendChart(meals) {
       buildTrendPoints(stepsValues)
     );
 }
+
 function setupDualChart() {
   const left = document.getElementById("chartSelectLeft");
   const right = document.getElementById("chartSelectRight");
@@ -432,7 +433,7 @@ async function initInsights() {
   // initialize date range controls (defaults to last 7 days)
   setupDateRangeControls();
 
-  await setupDualChart();
+  setupMiniChartDropdowns();
 
   renderInsightGroups(meals);
 }
@@ -470,15 +471,15 @@ const metricConfig = {
     color: "#00166c",
     min: 1,
     max: 5,
-    topLabel: "比平常多",
+    topLabel: "吃的比平常多",
     midLabel: "正常",
-    bottomLabel: "比平常少",
+    bottomLabel: "吃的比平常少",
     getValue: day => avg(day.intake)
   },
 
   moodBefore: {
     label: "飯前心情",
-    color: "#FFD78A",
+    color: "#F7C85A",
     min: 1,
     max: 5,
     topLabel: "很開心",
@@ -511,7 +512,7 @@ const metricConfig = {
 
   bodyBefore: {
     label: "飯前身體狀態",
-    color: "#a7e8c9",
+    color: "#6ED9AE",
     min: 1,
     max: 5,
     topLabel: "活力滿滿",
@@ -536,9 +537,14 @@ const metricConfig = {
     color: "#A78BFA",
     min: 0,
     max: 600,
-    topLabel: "10 小時",
-    midLabel: "5 小時",
-    bottomLabel: "0 小時",
+    ticks: [
+      { value: 600, label: "10hr" },
+      { value: 480, label: "8hr" },
+      { value: 360, label: "6hr" },
+      { value: 240, label: "4hr" },
+      { value: 120, label: "2hr" },
+      { value: 0, label: "0hr" }
+    ],
     getValue: day => avg(day.sleepMinutes)
   },
 
@@ -546,10 +552,15 @@ const metricConfig = {
     label: "步數",
     color: "#6B7280",
     min: 0,
-    max: 12000,
-    topLabel: "12k",
-    midLabel: "6k",
-    bottomLabel: "0",
+    max: 15000,
+    ticks: [
+      { value: 15000, label: "15k" },
+      { value: 12000, label: "12k" },
+      { value: 9000, label: "9k" },
+      { value: 6000, label: "6k" },
+      { value: 3000, label: "3k" },
+      { value: 0, label: "0" }
+    ],
     getValue: day => avg(day.steps)
   }
 };
@@ -660,20 +671,22 @@ function valueToMiniChartY(value, config) {
 
 function renderMiniChart(slot, metricKey) {
   const config = metricConfig[metricKey];
-  const select = document.getElementById(
-  slot === "A" ? "chartSelectA" : "chartSelectB"
-);
+  if (!config) return;
 
-if (select) {
-  select.style.backgroundColor = config.color;
-}
+  const select = document.getElementById(
+    slot === "A" ? "chartSelectA" : "chartSelectB"
+  );
+
+  if (select) {
+    select.style.backgroundColor = config.color;
+  }
 
   const { dates, daily } = buildDailyInsightData(
     weeklyMealsCache,
     weeklyHealthCache
   );
 
-  const xPositions = [58, 105, 152, 199, 246, 293, 340];
+  const xPositions = [58, 106, 154, 202, 250, 298, 346];
 
   const values = dates.map(dateKey => {
     const value = config.getValue(daily[dateKey]);
@@ -683,25 +696,25 @@ if (select) {
   const points = values
     .map((value, index) => {
       if (value == null) return "";
-      return `${xPositions[index]},${valueToMiniChartY(value, config)}`;
+      return `${xPositions[index]},${valueToSingleChartY(value, config)}`;
     })
     .filter(Boolean)
     .join(" ");
 
-  document.getElementById(`chartLine${slot}`).setAttribute("points", points);
-  document.getElementById(`chartLine${slot}`).style.stroke = config.color;
+  const line = document.getElementById(`chartLine${slot}`);
+  const dots = document.getElementById(`chartDots${slot}`);
 
-  document.getElementById(`chartDots${slot}`).innerHTML = values
+  line.setAttribute("points", points);
+  line.style.stroke = config.color;
+
+  dots.innerHTML = values
     .map((value, index) => {
       if (value == null) return "";
 
-      const x = xPositions[index];
-      const y = valueToMiniChartY(value, config);
-
       return `
         <circle
-          cx="${x}"
-          cy="${y}"
+          cx="${xPositions[index]}"
+          cy="${valueToSingleChartY(value, config)}"
           r="4.8"
           class="mini-chart-dot"
           style="fill:${config.color}"
@@ -710,13 +723,74 @@ if (select) {
     })
     .join("");
 
-  document.getElementById(`yLabels${slot}`).innerHTML = `
-    <text x="4" y="30" class="mini-y-label">${config.topLabel}</text>
-    <text x="4" y="88" class="mini-y-label muted">${config.midLabel}</text>
-    <text x="4" y="145" class="mini-y-label">${config.bottomLabel}</text>
-  `;
-
+  renderSingleYLabels(slot, config);
+  renderAverageLine(slot, values, config);
   renderMiniXAxisLabels(slot, dates);
+}
+
+function valueToSingleChartY(value, config) {
+  const topY = 20;
+  const bottomY = 175;
+
+  const safeValue = Math.max(
+    config.min,
+    Math.min(config.max, Number(value))
+  );
+
+  const ratio = (safeValue - config.min) / (config.max - config.min);
+
+  return bottomY - ratio * (bottomY - topY);
+}
+
+function renderSingleYLabels(slot, config) {
+  const group = document.getElementById(`yLabels${slot}`);
+
+  if (config.ticks) {
+    group.innerHTML = config.ticks
+      .map(tick => `
+        <text
+          x="48"
+          y="${valueToSingleChartY(tick.value, config) + 4}"
+          text-anchor="end"
+          class="mini-y-label"
+        >
+          ${tick.label}
+        </text>
+      `)
+      .join("");
+
+    return;
+  }
+
+  group.innerHTML = `
+    <text x="48" y="${valueToSingleChartY(config.max, config) + 4}" text-anchor="end" class="mini-y-label">
+      ${config.topLabel}
+    </text>
+
+    <text x="48" y="${valueToSingleChartY((config.min + config.max) / 2, config) + 4}" text-anchor="end" class="mini-y-label muted">
+      ${config.midLabel}
+    </text>
+
+    <text x="48" y="${valueToSingleChartY(config.min, config) + 4}" text-anchor="end" class="mini-y-label">
+      ${config.bottomLabel}
+    </text>
+  `;
+}
+
+function renderAverageLine(slot, values, config) {
+  const avgValue = avg(values.filter(value => value != null));
+  const line = document.getElementById(`avgLine${slot}`);
+
+  if (avgValue == null) {
+    line.style.display = "none";
+    return;
+  }
+
+  const y = valueToSingleChartY(avgValue, config);
+
+  line.style.display = "block";
+  line.setAttribute("y1", y);
+  line.setAttribute("y2", y);
 }
 
 function renderMiniXAxisLabels(slot, dates) {
@@ -733,7 +807,7 @@ function renderMiniXAxisLabels(slot, dates) {
       return `
         <text
           x="${xPositions[index]}"
-          y="166"
+          y="192"
           text-anchor="middle"
           class="mini-x-label"
         >
@@ -742,7 +816,7 @@ function renderMiniXAxisLabels(slot, dates) {
 
         <text
           x="${xPositions[index]}"
-          y="181"
+          y="208"
           text-anchor="middle"
           class="mini-date-label"
         >
@@ -1067,7 +1141,9 @@ async function updateDateRangeFromStartDate() {
   weeklyMealsCache = meals;
   weeklyHealthCache = healthLogs;
 
-  renderDualChart();
+  renderMiniChart("A", document.getElementById("chartSelectA").value);
+  renderMiniChart("B", document.getElementById("chartSelectB").value);
+
   renderInsightGroups(meals);
   updateReflectionRangeLabel();
 }
