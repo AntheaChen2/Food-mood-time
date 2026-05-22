@@ -22,76 +22,63 @@
     選兩個指標，看看過去七天的狀態變化吧
   </p>
 
-  <div class="dual-chart-header">
+ <div class="mini-chart-block">
+  <select id="chartSelectA" class="chart-select">
+    <option value="moodBefore">飯前心情</option>
+    <option value="intake">飲食份量感受</option>
+    <option value="moodAfter">飯後心情</option>
+    <option value="bodyBefore">飯前身體狀態</option>
+    <option value="bodyAfter">飯後身體狀態</option>
+    <option value="stressScore">壓力分數</option>
+    <option value="sleepMinutes">睡眠時長</option>
+    <option value="steps">步數</option>
+  </select>
 
-    <select id="chartSelectLeft" class="chart-select">
-      <option value="intake">飲食份量感受</option>
-      <option value="moodBefore">飯前心情</option>
-      <option value="moodAfter">飯後心情</option>
-      <option value="bodyBefore">飯前身體狀態</option>
-      <option value="bodyAfter">飯後身體狀態</option>
-      <option value="stressScore">壓力分數</option>
-      <option value="sleepMinutes">睡眠時長</option>
-      <option value="steps">步數</option>
-    </select>
+  <p class="average-hint">
+  灰色虛線代表截至今日的平均值
+  </p>
 
-    <select id="chartSelectRight" class="chart-select">
-      <option value="">請選擇</option>
-      <option value="intake">飲食份量感受</option>
-      <option value="moodBefore">飯前心情</option>
-      <option value="moodAfter">飯後心情</option>
-      <option value="bodyBefore">飯前身體狀態</option>
-      <option value="bodyAfter">飯後身體狀態</option>
-      <option value="stressScore">壓力分數</option>
-      <option value="sleepMinutes">睡眠時長</option>
-      <option value="steps">步數</option>
-    </select>
-
-  </div>
-
-  <svg
-    class="dual-insight-chart"
-    id="dualChart"
-    viewBox="0 0 420 230"
-  >
-
-    <!-- 左 y 軸 -->
+  <svg class="single-insight-chart" viewBox="0 0 390 235">
     <line x1="58" y1="20" x2="58" y2="175" class="mini-axis" />
+    <line x1="58" y1="175" x2="350" y2="175" class="mini-axis" />
 
-    <!-- 右 y 軸 -->
-    <line x1="342" y1="20" x2="342" y2="175" class="mini-axis" />
+    <line id="avgLineA" x1="58" x2="350" y1="90" y2="90" class="average-line" />
 
-    <!-- x 軸 -->
-    <line x1="58" y1="175" x2="342" y2="175" class="mini-axis" />
-
-    <!-- 左 labels -->
-    <g id="leftYLabels"></g>
-
-    <!-- 右 labels -->
-    <g id="rightYLabels"></g>
-
-    <!-- x labels -->
-    <g id="dualXLabels"></g>
-
-    <!-- 左線 -->
-    <polyline
-      id="leftChartLine"
-      class="dual-chart-line"
-      points=""
-    />
-
-    <!-- 右線 -->
-    <polyline
-      id="rightChartLine"
-      class="dual-chart-line"
-      points=""
-    />
-
-    <!-- dots -->
-    <g id="leftChartDots"></g>
-    <g id="rightChartDots"></g>
-
+    <g id="yLabelsA"></g>
+    <polyline id="chartLineA" class="mini-chart-line" points="" />
+    <g id="chartDotsA"></g>
+    <g id="xLabelsA"></g>
   </svg>
+</div>
+
+<div class="mini-chart-block">
+  <select id="chartSelectB" class="chart-select">
+    <option value="intake">飲食份量感受</option>
+    <option value="moodBefore">飯前心情</option>
+    <option value="moodAfter">飯後心情</option>
+    <option value="bodyBefore">飯前身體狀態</option>
+    <option value="bodyAfter">飯後身體狀態</option>
+    <option value="stressScore">壓力分數</option>
+    <option value="sleepMinutes">睡眠時長</option>
+    <option value="steps">步數</option>
+  </select>
+
+  <p class="average-hint">
+  灰色虛線代表截至今日的平均值
+  </p>
+
+  <svg class="single-insight-chart" viewBox="0 0 390 235">
+    <line x1="58" y1="20" x2="58" y2="175" class="mini-axis" />
+    <line x1="58" y1="175" x2="350" y2="175" class="mini-axis" />
+
+    <line id="avgLineB" x1="58" x2="350" y1="90" y2="90" class="average-line" />
+
+    <g id="yLabelsB"></g>
+    <polyline id="chartLineB" class="mini-chart-line" points="" />
+    <g id="chartDotsB"></g>
+    <g id="xLabelsB"></g>
+  </svg>
+</div>
 
   <div class="date-range-controls">
   <label>
@@ -102,32 +89,63 @@
 
   </section>
 
-      <section class="insight-section">
-        <h2>讓你有活力的餐點💪</h2>
-        <div class="insight-meal-grid" id="energyMeals"></div>
-      </section>
+  <section class="insight-section">
+  <h2>
+  讓你有活力的餐點💪
+  <span class="insight-source-badge">來自 Q6 飯後身體狀態</span>
+  </h2>
+  <div class="insight-meal-grid" id="energyMeals"></div>
+  <div class="swipe-hint insight-swipe-hint">
+    <span>←</span>
+    <small>左右滑動查看更多</small>
+    <span>→</span>
+  </div>
+</section>
 
-      <section class="insight-section">
-        <h2>吃完心情好的餐點😄</h2>
-        <div class="insight-meal-grid" id="happyMeals"></div>
-      </section>
+<section class="insight-section">
+  <h2>
+  吃完心情好的餐點😄
+  <span class="insight-source-badge">來自 Q6 飯後心情</span>
+  </h2>
+  <div class="insight-meal-grid" id="happyMeals"></div>
+  <div class="swipe-hint insight-swipe-hint">
+    <span>←</span>
+    <small>左右滑動查看更多</small>
+    <span>→</span>
+  </div>
+</section>
 
-      <section class="insight-section">
-        <h2>心情低落時或壓力大時的餐點😥</h2>
-        <div class="insight-meal-grid" id="stressMeals"></div>
-      </section>
+<section class="insight-section">
+  <h2>
+  心情低落或有壓力時的餐點😥
+  <span class="insight-source-badge">來自 Q4 飯前心情／壓力</span>
+  </h2>
+  <div class="insight-meal-grid" id="stressMeals"></div>
+  <div class="swipe-hint insight-swipe-hint">
+    <span>←</span>
+    <small>左右滑動查看更多</small>
+    <span>→</span>
+  </div>
+</section>
 
     </section>
+      <nav class="bottom-nav" aria-label="Bottom navigation">
 
-    <nav class="bottom-nav" aria-label="Bottom navigation">
-      <button class="nav-item" onclick="location.href='index.html'">
-        <span>🏠</span><small>Homepage</small>
-      </button>
-      <button class="add-button" onclick="location.href='record.html'">＋</button>
-      <button class="nav-item active">
-        <span>💡</span><small>Insights</small>
-      </button>
-    </nav>
+  <button class="nav-item" onclick="location.href='index.html'" type="button">
+    <img src="icon/home.png" class="nav-icon" alt="Homepage" />
+    <small>Homepage</small>
+  </button>
+
+  <button class="add-button" id="addButton" onclick="location.href='record.html'" aria-label="Add food entry">
+    ＋
+  </button>
+
+  <button class="nav-item active" type="button">
+    <img src="icon/idea.png" class="nav-icon" alt="Insights" />
+    <small>Insights</small>
+  </button>
+
+</nav>
   </main>
 
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
