@@ -504,9 +504,16 @@ const metricConfig = {
     color: "#56C6CE",
     min: 0,
     max: 100,
-    topLabel: "100",
-    midLabel: "50",
-    bottomLabel: "0",
+
+    ticks: [
+      { value: 100, label: "100" },
+      { value: 80, label: "80" },
+      { value: 60, label: "60" },
+      { value: 40, label: "40" },
+      { value: 20, label: "20" },
+      { value: 0, label: "0" }
+    ],
+
     getValue: day => avg(day.stressScore)
   },
 
@@ -668,6 +675,49 @@ function valueToMiniChartY(value, config) {
   return bottomY - ratio * (bottomY - topY);
 }
 
+function getSleepTicks(maxSleepValue) {
+  if (maxSleepValue > 10) {
+    return [
+      { value: 12, label: "12hr" },
+      { value: 9, label: "9hr" },
+      { value: 6, label: "6hr" },
+      { value: 3, label: "3hr" },
+      { value: 0, label: "0hr" }
+    ];
+  }
+
+  return [
+    { value: 10, label: "10hr" },
+    { value: 8, label: "8hr" },
+    { value: 6, label: "6hr" },
+    { value: 4, label: "4hr" },
+    { value: 2, label: "2hr" },
+    { value: 0, label: "0hr" }
+  ];
+}
+
+function getStepTicks(maxStepValue) {
+  if (maxStepValue > 15000) {
+    return [
+      { value: 20000, label: "20k" },
+      { value: 16000, label: "16k" },
+      { value: 12000, label: "12k" },
+      { value: 8000, label: "8k" },
+      { value: 4000, label: "4k" },
+      { value: 0, label: "0" }
+    ];
+  }
+
+  return [
+    { value: 15000, label: "15k" },
+    { value: 12000, label: "12k" },
+    { value: 9000, label: "9k" },
+    { value: 6000, label: "6k" },
+    { value: 3000, label: "3k" },
+    { value: 0, label: "0" }
+  ];
+}
+
 function renderMiniChart(slot, metricKey) {
   const config = metricConfig[metricKey];
   if (!config) return;
@@ -691,6 +741,20 @@ function renderMiniChart(slot, metricKey) {
     const value = config.getValue(daily[dateKey]);
     return value == null ? null : value;
   });
+
+  if (metricKey === "sleepDuration") {
+    const maxSleepValue = Math.max(...values.filter(value => value != null));
+
+    config.max = maxSleepValue > 10 ? 12 : 10;
+    config.ticks = getSleepTicks(maxSleepValue);
+  }
+
+  if (metricKey === "steps") {
+    const maxStepValue = Math.max(...values.filter(value => value != null));
+
+    config.max = maxStepValue > 15000 ? 20000 : 15000;
+    config.ticks = getStepTicks(maxStepValue);
+  }
 
   const points = values
     .map((value, index) => {
