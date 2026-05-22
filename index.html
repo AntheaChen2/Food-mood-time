@@ -99,11 +99,18 @@
       </section>
 
       <section class="card food-color-card nutrition-slide">
-        <p class="section-label">食物類型</p>
-        <div class="food-color-list" id="foodGroups"></div>
+        <p class="section-label" id="foodColorTitle">食物類型</p>
+
+        <div class="food-color-carousel" id="foodGroups"></div>
+
+        <div class="food-color-dots" id="foodColorDots"></div>
       </section>
     </div>
-
+    <div class="swipe-hint nutrition-swipe-hint">
+      <span>←</span>
+      <small>左右滑動查看更多</small>
+      <span>→</span>
+    </div>
       <section class="card mood-card">
         <div class="mood-tabs" id="moodTabs">
           <button data-mood="body" class="mood-tab active">
@@ -206,31 +213,25 @@
 
       <section class="card physical-card">
         <div class="physical-item">
-          <span class="physical-icon">💤</span>
+          <img class="physical-icon-image" id="sleepDurationIcon" src="emoji/clock.png" alt="睡眠時長">
           <strong id="sleepDuration">--</strong>
           <small>睡眠時間</small>
         </div>
 
         <div class="physical-item">
-          <span class="physical-icon">🌙</span>
+          <img class="physical-icon-image" id="sleepScoreIcon" src="emoji/sleep.png" alt="睡眠分數">
           <strong id="sleepScore">--</strong>
           <small>睡眠分數</small>
         </div>
 
         <div class="physical-item">
-          <span class="physical-icon">👣</span>
+          <img class="physical-icon-image" id="stepCountIcon" src="emoji/steps.png" alt="步數">
           <strong id="stepCount">--</strong>
           <small>步數</small>
         </div>
 
         <div class="physical-item">
-          <img
-            class="physical-icon-image"
-            id="stressPhysicalIcon"
-            src="emoji/stress2.png"
-            alt="Stress Icon"
-          />
-
+          <img class="physical-icon-image" id="stressPhysicalIcon" src="emoji/stress_score.png" alt="壓力分數">
           <strong id="stressScore">--</strong>
           <small>壓力分數</small>
         </div>
@@ -238,10 +239,26 @@
     </section>
 
     <nav class="bottom-nav" aria-label="Bottom navigation">
-      <button class="nav-item active"><span>🏠</span><small>Homepage</small></button>
-      <button class="add-button" id="addButton" aria-label="Add food entry">＋</button>
-      <button class="nav-item" id="insightsButton"><span>💡</span><small>Insights</small></button>
-    </nav>
+
+  <button class="nav-item active" onclick="location.href='index.html'" type="button">
+    <img src="icon/home.png" class="nav-icon" alt="Homepage" />
+    <small>Homepage</small>
+  </button>
+
+  <button class="add-button" id="addButton" aria-label="Add food entry">
+    ＋
+  </button>
+
+  <button
+    class="nav-item"
+    id="insightsButton"
+    type="button"
+  >
+    <img src="icon/idea.png" class="nav-icon" alt="Insights" />
+    <small>Insights</small>
+  </button>
+
+</nav>
 
   </main>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
