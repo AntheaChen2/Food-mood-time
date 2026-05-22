@@ -612,7 +612,6 @@ function buildDailyInsightData(meals, healthLogs) {
     daily[dateKey].intake.push(meal.foodIntake);
     daily[dateKey].moodBefore.push(meal.moodBefore);
     daily[dateKey].moodAfter.push(meal.moodAfter);
-    daily[dateKey].stressScore.push(meal.stressScore);
     daily[dateKey].bodyBefore.push(meal.bodyBefore);
     daily[dateKey].bodyAfter.push(meal.bodyAfter);
   });
