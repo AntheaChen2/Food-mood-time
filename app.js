@@ -1050,7 +1050,7 @@ function formatSleep(minutes) {
   const hours = Math.floor(minutes / 60);
   const mins = minutes % 60;
 
-  return `${hours} hr ${mins} 分鐘`;
+  return `${hours}hr ${mins}m`;
 }
 
 function applyCompareClass(element, todayValue, yesterdayValue) {
