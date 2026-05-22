@@ -486,11 +486,17 @@ function renderNutritionDonut({ carbs, protein, fat, fiber }) {
     const element = document.getElementById(segment.id);
     if (!element) return;
 
+    // 當總熱量為 0，或者單項營養素為 0 時
     if (total <= 0 || segment.value <= 0) {
+      // 關鍵修改：將 dasharray 設為 0，且暫時隱藏，徹底防止圓角點（stroke-linecap）跑出來
       element.style.strokeDasharray = `0 ${circumference}`;
       element.style.strokeDashoffset = "0";
+      element.style.display = "none"; 
       return;
     }
+
+    // 如果大於 0，確保它正常顯示
+    element.style.display = "block";
 
     const length = (segment.value / total) * circumference;
 
@@ -503,64 +509,95 @@ function renderNutritionDonut({ carbs, protein, fat, fiber }) {
 
 function renderFoodGroups(entries) {
   const foodGroups = document.getElementById("foodGroups");
-  const items = entries.flatMap(entry => entry.items || []);
+  const dots = document.getElementById("foodColorDots");
+  const card = document.querySelector(".food-color-card");
 
-  const colorOrder = [
-    { key: "green", label: "無" },
-    { key: "yellow", label: "無" },
-    { key: "orange", label: "無" }
+  const visibleEntries = state.selectedMealEntryId
+  ? entries.filter(entry => entry.id === state.selectedMealEntryId)
+  : entries;
+
+  const items = visibleEntries.flatMap(entry => entry.items || []);
+  console.log("selectedMealEntryId", state.selectedMealEntryId);
+  console.table(
+  visibleEntries.map(entry => ({
+    id: entry.id,
+    mealType: entry.mealType,
+    foods: entry.items?.map(item => item.original_food || item.matched_name)
+  }))
+);
+
+  const colorCards = [
+    { key: "green", title: "綠色食物", dot: "🟢" },
+    { key: "yellow", title: "黃色食物", dot: "🟡" },
+    { key: "orange", title: "橘色食物", dot: "🟠" }
   ];
 
-  const totalCalories = items.reduce(
-    (sum, item) => sum + Number(item.calories || 0),
-    0
-  );
+  foodGroups.innerHTML = colorCards.map(({ key, title, dot }) => {
+    const colorItems = items.filter(item => item.color_category === key);
 
-  foodGroups.innerHTML = colorOrder
-    .map(({ key, label }) => {
-      const colorItems = items.filter(
-        item => item.color_category === key
-      );
+    const totalCalories = Math.round(
+      colorItems.reduce((sum, item) => sum + Number(item.calories || 0), 0)
+    );
 
-      const colorCalories = colorItems.reduce(
-        (sum, item) => sum + Number(item.calories || 0),
-        0
-      );
+    const foodNames = colorItems
+      .map(item => item.original_food || item.matched_name || item.search_name)
+      .filter(Boolean);
 
-      const ratio = totalCalories
-        ? (colorCalories / totalCalories) * 100
-        : 0;
-
-      const barHeight = items.length
-        ? Math.max((ratio / 100) * 44, 8)
-        : 44;
-
-      const names = colorItems
-        .map(
-          item =>
-            item.original_food ||
-            item.matched_name ||
-            item.search_name
-        )
-        .filter(Boolean)
-        .join("、");
-
-      return `
-        <div class="food-color-row">
-          <div class="food-color-bar-track">
-            <div
-              class="food-color-bar ${key}"
-              style="height:${barHeight}px"
-            ></div>
-          </div>
-
-          <div class="food-color-text">
-            <strong>${names || label}</strong>
-          </div>
+    return `
+      <article class="food-color-slide ${key}">
+        <div class="food-color-card-header">
+          <h3 class="${key}">
+            <span>${dot}</span>${title}
+          </h3>
+         <strong>${totalCalories} Cal</strong>
         </div>
-      `;
-    })
-    .join("");
+
+        <div class="food-chip-list">
+          ${
+            foodNames.length
+              ? foodNames.map(name => `<span class="food-chip">${name}</span>`).join("")
+              : `<span class="food-empty">尚無此類食物</span>`
+          }
+        </div>
+      </article>
+    `;
+  }).join("");
+
+  dots.innerHTML = colorCards.map((_, index) => `
+    <span class="food-color-dot ${index === 0 ? "active" : ""}"></span>
+  `).join("");
+
+  function updateActiveColor(index) {
+    const activeKey = colorCards[index]?.key || "green";
+
+    card.classList.remove("green", "yellow", "orange");
+    card.classList.add(activeKey);
+
+    dots.querySelectorAll(".food-color-dot").forEach((dot, dotIndex) => {
+      dot.classList.toggle("active", dotIndex === index);
+    });
+  }
+
+  foodGroups.onscroll = null;
+
+  requestAnimationFrame(() => {
+    foodGroups.scrollLeft = 0;
+    updateActiveColor(0);
+  });
+
+  foodGroups.onscroll = () => {
+    const slideWidth = foodGroups.clientWidth || 1;
+
+    const activeIndex = Math.max(
+      0,
+      Math.min(
+        colorCards.length - 1,
+        Math.round(foodGroups.scrollLeft / slideWidth)
+      )
+    );
+
+    updateActiveColor(activeIndex);
+  };
 }
 
 function renderMoodTrend() {
@@ -770,22 +807,28 @@ function clampScale(value) {
 }
 
 function updateMoodTabEmojis() {
-
   const bodyAvg = getAverageMetric("body");
   const moodAvg = getAverageMetric("mood");
   const stressAvg = getAverageMetric("stress");
 
-  document.querySelector(
-    '[data-icon-target="body"]'
-  ).src = moodIconSets.body[bodyAvg - 1];
+  // 1. 定義三個維度專屬的表情路徑
+  const iconSets = {
+    body: ["emoji/Body1.png", "emoji/Body2.png", "emoji/Body3.png", "emoji/Body4.png", "emoji/Body5.png"],
+    mood: ["emoji/Mood1.png", "emoji/Mood2.png", "emoji/Mood3.png", "emoji/Mood4.png", "emoji/Mood5.png"],
+    stress: ["emoji/stress1.png", "emoji/stress2.png", "emoji/stress3.png", "emoji/stress4.png", "emoji/stress5.png"]
+  };
 
-  document.querySelector(
-    '[data-icon-target="mood"]'
-  ).src = moodIconSets.mood[moodAvg - 1];
+  // 2. 判定：被選中的按鈕 (state.selectedMoodFilter) 才顯示當天平均分數的表情（1~5分）
+  // 沒被選中的按鈕，一律固定顯示最代表該功能的經典 4 分表情（或是你可以自己指定固定哪一分，比如 3 或 4），讓視覺有區隔！
+  
+  document.querySelector('[data-icon-target="body"]').src = 
+    state.selectedMoodFilter === "body" ? iconSets.body[bodyAvg - 1] : "emoji/Body4.png";
 
-  document.querySelector(
-    '[data-icon-target="stress"]'
-  ).src = moodIconSets.stress[stressAvg - 1];
+  document.querySelector('[data-icon-target="mood"]').src = 
+    state.selectedMoodFilter === "mood" ? iconSets.mood[moodAvg - 1] : "emoji/Mood4.png";
+
+  document.querySelector('[data-icon-target="stress"]').src = 
+    state.selectedMoodFilter === "stress" ? iconSets.stress[stressAvg - 1] : "emoji/stress4.png";
 }
 
 function updateTrendColors() {
@@ -1010,6 +1053,23 @@ function formatSleep(minutes) {
   return `${hours} hr ${mins} 分鐘`;
 }
 
+function applyCompareClass(element, todayValue, yesterdayValue) {
+  element.classList.remove("value-up", "value-down", "value-same");
+
+  if (todayValue == null || yesterdayValue == null) {
+    element.classList.add("value-same");
+    return;
+  }
+
+  if (todayValue > yesterdayValue) {
+    element.classList.add("value-up");
+  } else if (todayValue < yesterdayValue) {
+    element.classList.add("value-down");
+  } else {
+    element.classList.add("value-same");
+  }
+}
+
 function formatDateForSupabase(date) {
   return date.toLocaleDateString("en-CA", {
     timeZone: "Asia/Taipei"
@@ -1025,32 +1085,64 @@ function formatDateInputValue(date) {
 async function loadDailyHealthLog() {
   if (!currentUser) return;
 
-  const selectedDateString =
-    formatDateForSupabase(state.selectedDate);
+  const selectedDateString = formatDateForSupabase(state.selectedDate);
+  const yesterdayDateString = formatDateForSupabase(addDays(state.selectedDate, -1));
 
-  console.log(selectedDateString);
-
-  const { data, error } = await db
+  const { data: todayData, error: todayError } = await db
     .from("daily_health_logs")
     .select("*")
     .eq("user_id", currentUser.id)
     .eq("log_date", selectedDateString)
     .maybeSingle();
 
-  if (error) {
-    console.warn(error.message);
+  if (todayError) {
+    console.warn(todayError.message);
     return;
   }
 
-  document.getElementById("sleepDuration").textContent =
-    data ? formatSleep(data.sleep_minutes) : "--";
+  const { data: yesterdayData, error: yesterdayError } = await db
+    .from("daily_health_logs")
+    .select("*")
+    .eq("user_id", currentUser.id)
+    .eq("log_date", yesterdayDateString)
+    .maybeSingle();
 
-  document.getElementById("sleepScore").textContent =
-    data?.sleep_score ?? "--";
+  if (yesterdayError) {
+    console.warn(yesterdayError.message);
+  }
 
-  document.getElementById("stepCount").textContent =
-    data?.steps ?? "--";
+  const sleepDurationEl = document.getElementById("sleepDuration");
+  const sleepScoreEl = document.getElementById("sleepScore");
+  const stepCountEl = document.getElementById("stepCount");
+  const stressScoreEl = document.getElementById("stressScore");
 
-  document.getElementById("stressScore").textContent =
-    data?.stress_score ?? "--";
+  sleepDurationEl.textContent =
+    todayData ? formatSleep(todayData.sleep_minutes) : "--";
+
+  sleepScoreEl.textContent =
+    todayData?.sleep_score ?? "--";
+
+  stepCountEl.textContent =
+    todayData?.steps ?? "--";
+
+  stressScoreEl.textContent =
+    todayData?.stress_score ?? "--";
+
+  applyCompareClass(
+    sleepDurationEl,
+    todayData?.sleep_minutes,
+    yesterdayData?.sleep_minutes
+  );
+
+  applyCompareClass(
+    sleepScoreEl,
+    todayData?.sleep_score,
+    yesterdayData?.sleep_score
+  );
+
+  applyCompareClass(
+  stressScoreEl,
+  todayData?.stress_score,
+  yesterdayData?.stress_score
+);
 }
