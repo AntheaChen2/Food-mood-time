@@ -191,9 +191,11 @@ function renderInsightGroups(meals) {
     [4, 5].includes(Number(meal.moodAfter))
   );
 
+// 修改後：飯前心情依然是 1, 2 分代表低落（很不開心）
+// 但飯前壓力改成大於等於 4 分 (>= 4) 或是大於等於 4.5 分才算高壓！
   const lowMoodOrStressMeals = meals.filter(meal =>
-    [1, 2].includes(Number(meal.moodBefore)) ||
-    [1, 2].includes(Number(meal.stressBefore))
+    [1, 2].includes(Number(meal.moodBefore)) || 
+    Number(meal.stressBefore) >= 4.0
   );
 
   renderMealCards("energyMeals", energyMeals);
