@@ -191,11 +191,9 @@ function renderInsightGroups(meals) {
     [4, 5].includes(Number(meal.moodAfter))
   );
 
-// 修改後：飯前心情依然是 1, 2 分代表低落（很不開心）
-// 但飯前壓力改成大於等於 4 分 (>= 4) 或是大於等於 4.5 分才算高壓！
   const lowMoodOrStressMeals = meals.filter(meal =>
-    [1, 2].includes(Number(meal.moodBefore)) || 
-    Number(meal.stressBefore) >= 4.0
+    [1, 2].includes(Number(meal.moodBefore)) ||
+    [1, 2].includes(Number(meal.stressBefore))
   );
 
   renderMealCards("energyMeals", energyMeals);
@@ -501,22 +499,16 @@ const metricConfig = {
     getValue: day => avg(day.moodAfter)
   },
 
-  stressScore: {
-    label: "壓力分數",
+  resilience: {
+    label: "韌性",
     color: "#56C6CE",
-    min: 0,
-    max: 100,
-
-    ticks: [
-      { value: 100, label: "100" },
-      { value: 80, label: "80" },
-      { value: 60, label: "60" },
-      { value: 40, label: "40" },
-      { value: 20, label: "20" },
-      { value: 0, label: "0" }
-    ],
-
-    getValue: day => avg(day.stressScore)
+    min: 1,
+    max: 3,
+    topLabel: "理想",
+    midLabel: "平衡",
+    bottomLabel: "低",
+    isCategoryChart: true,
+    getValue: day => getResilienceValue(day.resilience)
   },
 
   bodyBefore: {
@@ -606,7 +598,7 @@ function buildDailyInsightData(meals, healthLogs) {
       intake: [],
       moodBefore: [],
       moodAfter: [],
-      stressScore: [],
+      resilience: [],
       bodyBefore: [],
       bodyAfter: [],
       sleepMinutes: [],
@@ -636,8 +628,8 @@ function buildDailyInsightData(meals, healthLogs) {
     if (log.steps != null) {
       daily[dateKey].steps.push(Number(log.steps));
     }
-    if (log.stress_score != null) {
-      daily[dateKey].stressScore.push(Number(log.stress_score));
+    if (log.resilience != null) {
+    daily[dateKey].resilience.push(log.resilience);
     }
   });
 
@@ -731,6 +723,15 @@ function renderMiniChart(slot, metricKey) {
   if (select) {
     select.style.backgroundColor = config.color;
   }
+  const hint = document.getElementById(
+  slot === "A" ? "chartHintA" : "chartHintB"
+);
+
+if (hint) {
+  hint.textContent = config.isCategoryChart
+    ? "來自 Google Health：代表每日身體狀態是否準備好應對生活"
+    : "灰色虛線代表截至今日的平均值";
+}
 
   const { dates, daily } = buildDailyInsightData(
     weeklyMealsCache,
@@ -769,33 +770,65 @@ function renderMiniChart(slot, metricKey) {
   const line = document.getElementById(`chartLine${slot}`);
   const dots = document.getElementById(`chartDots${slot}`);
 
-  line.setAttribute("points", points);
-  line.style.stroke = config.color;
+  if (config.isCategoryChart) {
+    line.setAttribute("points", "");
+  } else {
+    line.setAttribute("points", points);
+    line.style.stroke = config.color;
+  }
 
   dots.innerHTML = values
-    .map((value, index) => {
-      if (value == null) return "";
+  .map((value, index) => {
+    if (value == null) return "";
+
+    const x = xPositions[index];
+    const y = valueToSingleChartY(value, config);
+
+    if (config.isCategoryChart) {
+      const color = getResilienceColor(value);
 
       return `
-        <circle
-          cx="${xPositions[index]}"
-          cy="${valueToSingleChartY(value, config)}"
-          r="4.8"
-          class="mini-chart-dot"
-          style="fill:${config.color}"
+        <rect
+          x="${x - 11}"
+          y="${y - 11}"
+          width="22"
+          height="22"
+          rx="5"
+          class="resilience-point"
+          style="fill:${color}55; stroke:${color};"
         />
       `;
-    })
-    .join("");
+    }
 
-  renderSingleYLabels(slot, config);
+    return `
+      <circle
+        cx="${x}"
+        cy="${y}"
+        r="4.8"
+        class="mini-chart-dot"
+        style="fill:${config.color}"
+      />
+    `;
+  })
+  .join("");
+
+  if (config.isCategoryChart) {
+    renderResilienceYLabels(slot, config);
+  } else {
+    renderSingleYLabels(slot, config);
+  }
+  if (config.isCategoryChart) {
+  document.getElementById(`avgLine${slot}`).style.display = "none";
+  } else {
   renderAverageLine(slot, values, config);
+  }
   renderMiniXAxisLabels(slot, dates);
+  toggleCategoryChartStyle(slot, config.isCategoryChart);
 }
 
 function valueToSingleChartY(value, config) {
-  const topY = 20;
-  const bottomY = 175;
+  const topY = config.isCategoryChart ? 58 : 20;
+  const bottomY = config.isCategoryChart ? 148 : 175;
 
   const safeValue = Math.max(
     config.min,
@@ -841,6 +874,35 @@ function renderSingleYLabels(slot, config) {
     </text>
   `;
 }
+
+function renderResilienceYLabels(slot, config) {
+  const group = document.getElementById(`yLabels${slot}`);
+
+  group.innerHTML = `
+    <text x="42" y="${valueToSingleChartY(3, config) + 5}" text-anchor="end" class="mini-y-label resilience-label">
+      理想
+    </text>
+
+    <text x="42" y="${valueToSingleChartY(2, config) + 5}" text-anchor="end" class="mini-y-label resilience-label">
+      平衡
+    </text>
+
+    <text x="42" y="${valueToSingleChartY(1, config) + 5}" text-anchor="end" class="mini-y-label resilience-label">
+      低
+    </text>
+  `;
+}
+
+function toggleCategoryChartStyle(slot, isCategoryChart) {
+  const svg = document
+    .getElementById(`chartLine${slot}`)
+    ?.closest("svg");
+
+  if (!svg) return;
+
+  svg.classList.toggle("resilience-chart-mode", Boolean(isCategoryChart));
+}
+
 
 function renderAverageLine(slot, values, config) {
   const avgValue = avg(values.filter(value => value != null));
@@ -1211,4 +1273,26 @@ async function updateDateRangeFromStartDate() {
 
   renderInsightGroups(meals);
   updateReflectionRangeLabel();
+}
+
+function getResilienceValue(labels) {
+  if (!labels || labels.length === 0) return null;
+
+  const map = {
+    "低": 1,
+    "平衡": 2,
+    "理想": 3
+  };
+
+  const values = labels
+    .map(label => map[label])
+    .filter(value => value != null);
+
+  return values.length ? values[0] : null;
+}
+
+function getResilienceColor(value) {
+  if (value === 3) return "#A7E8A8";
+  if (value === 2) return "#A9D8F5";
+  return "#F6B99A";
 }
