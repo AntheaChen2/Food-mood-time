@@ -953,72 +953,63 @@ h2 {
 
 .physical-card {
   display: grid !important;
-  grid-template-columns: repeat(4, 1fr) !important; /* 完美平分 4 個格子 */
+  grid-template-columns: repeat(4, minmax(0, 1fr)) !important;
   gap: 8px !important;
-  padding: 18px 12px !important;   /* 內邊距微調，讓空間更對稱 */
+  padding: 18px 12px !important;
   background: var(--card);
   border-radius: var(--radius);
+  align-items: start !important;
 }
 
 .physical-item {
   display: flex !important;
   flex-direction: column !important;
-  align-items: center !important;     /* 1. 關鍵：強迫內部所有元素「水平置中」 */
-  justify-content: center !important;  /* 2. 關鍵：強迫內部所有元素「垂直置中」 */
+  align-items: center !important;
+  justify-content: flex-start !important;
   text-align: center !important;
   width: 100% !important;
+  min-height: 82px !important;
+  padding: 0 !important;
+  box-sizing: border-box !important;
+  gap: 6px !important;
 }
 
-/* 3. 核心大修正：死死鎖定所有圖片/圖示的容器規格，不論什麼圖片進來，大小通通一樣！ */
 .physical-item .physical-icon,
 .physical-item .physical-icon-image {
-  width: 28px !important;             /* 嚴格限定寬度 28px（黃金視覺比例） */
-  height: 28px !important;            /* 嚴格限定高度 28px */
-  object-fit: contain !important;     /* 確保下載下來的 Flaticon 精緻圖案絕不變形歪斜 */
+  width: 28px !important;
+  height: 28px !important;
+  object-fit: contain !important;
   display: block !important;
-  margin: 0 auto 8px auto !important; /* 確保下邊距一致，把文字往下推 */
+  flex: 0 0 auto !important;
+  margin: 0 auto !important;
 }
 
-/* 4. 數據粗體字對齊線 */
 .physical-item strong {
   display: block !important;
   font-size: 15px !important;
   font-weight: 800 !important;
   color: var(--text);
-  line-height: 1.2 !important;
-  margin-bottom: 4px !important;
-  min-height: 18px !important;        /* 鎖定文字高度，防止數據還沒載入時卡片震動 */
+  line-height: 1 !important;
+  margin: 0 !important;
+  min-height: 16px !important;
+  white-space: nowrap !important;
+  text-align: center !important;
+  position: relative !important;
+  top: 0 !important;
 }
 
-/* 5. 底部灰色小標籤對齊線 */
 .physical-item small {
   display: block !important;
   font-size: 11px !important;
   font-weight: 700 !important;
   color: var(--muted);
-  white-space: nowrap !important;     /* 避免手機螢幕太小時「睡眠時間」四個字被斷行 */
-}
-
-.physical-icon,
-.physical-icon-image {
-  width: 42px;
-  height: 42px;
-  object-fit: contain;
-  display: block;
-  margin: 0 auto 6px;
-}
-
-.physical-icon {
-  font-size: 34px;
-}
-
-.physical-item small {
-  color: var(--muted);
-  font-size: 11px;
-}
-
-.physical-item strong {
-  font-size: 18px;
+  line-height: 1.1 !important;
+  min-height: 12px !important;
+  margin: 1px 0 0 0 !important;
+  white-space: nowrap !important;
+  text-align: center !important;
+  position: relative !important;
+  top: 0 !important;
 }
 
 /* =========================================================
@@ -1524,7 +1515,7 @@ h2 {
 .average-hint {
   margin: 6px 0 0px 16px;
 
-  font-size: 11px;
+  font-size: 10px;
   font-weight: 500;
 
   color: #9ca3af;
@@ -1585,48 +1576,31 @@ h2 {
 
 
 /* ==========================================================================
-   終極視覺校正：修正文字下沉，讓四個格子的文字與圖片強迫完美對齊
+   生理數據卡片最終校正：所有格子共用同一組對齊規則
    ========================================================================== */
 
-/* 1. 為所有生理小格子的圖示區域，死死鎖定一個一致的最高防線容器高度 */
+.physical-card .physical-item {
+  min-height: 72px !important;
+}
+
 .physical-card .physical-item .physical-icon-image,
 .physical-card .physical-item .physical-icon {
-  display: flex !important;
-  align-items: flex-end !important;   /* 關鍵：讓所有圖片都在容器內「底部對齊」 */
-  justify-content: center !important;
-  height: 34px !important;            /* 統一高度，防止大圖片推擠下方文字 */
-  margin: 0 auto 8px auto !important; /* 鎖定底部的外邊距，讓推下去的文字高度完全一致 */
-}
-
-/* 2. 校正前三個 Flaticon 圖片（Clock, Sleep, Steps）的真實渲染大小與對齊 */
-.physical-card .physical-item:not(:last-child) .physical-icon-image,
-.physical-card .physical-item:not(:last-child) .physical-icon {
   width: 28px !important;
-  height: 28px !important;            /* 保持它們精緻的 28px 大小 */
-  object-fit: contain !important;
+  height: 28px !important;
+  margin: 0 auto 6px auto !important;
 }
 
-/* 3. 校正第四個壓力分數圖片（紅色表情）的大尺寸與滿版設定 */
-.physical-card .physical-item:last-child .physical-icon-image,
-.physical-card .physical-item:last-child .physical-icon {
-  width: 34px !important;
-  height: 34px !important;            /* 保持它滿版的 34px 視覺份量 */
-  object-fit: cover !important;
-}
-
-
-/* 4. 確保強體數字的行高完全固定，杜絕任何一像素的偏移 */
-.physical-item strong {
-  line-height: 1 !important;
-  margin-bottom: 4px !important;
+.physical-card .physical-item strong,
+.physical-card .physical-item small {
+  transform: none !important;
 }
 
 .physical-item strong.value-up {
-  color: #6fd6c8 !important; /* 淺湖水綠 */
+  color: #6fd6c8 !important;
 }
 
 .physical-item strong.value-down {
-  color: #f4a261 !important; /* 淺橘色 */
+  color: #f4a261 !important;
 }
 
 .physical-item strong.value-same {
