@@ -1053,6 +1053,23 @@ function formatSleep(minutes) {
   return `${hours}hr ${mins}m`;
 }
 
+function getResilienceRank(value) {
+  if (value == null) return null;
+
+  const text = String(value).trim().toLowerCase();
+
+  if (text.includes("low") || text.includes("低")) return 1;
+  if (
+    text.includes("medium") ||
+    text.includes("mid") ||
+    text.includes("moderate") ||
+    text.includes("中")
+  ) return 2;
+  if (text.includes("high") || text.includes("高")) return 3;
+
+  return null;
+}
+
 function applyCompareClass(element, todayValue, yesterdayValue) {
   element.classList.remove("value-up", "value-down", "value-same");
 
@@ -1116,6 +1133,15 @@ async function loadDailyHealthLog() {
   const stepCountEl = document.getElementById("stepCount");
   const stressScoreEl = document.getElementById("stressScore");
 
+  const todayResilienceText =
+    todayData?.resilience_text ??
+    todayData?.resilience ??
+    todayData?.resilience_level;
+  const yesterdayResilienceText =
+    yesterdayData?.resilience_text ??
+    yesterdayData?.resilience ??
+    yesterdayData?.resilience_level;
+
   sleepDurationEl.textContent =
     todayData ? formatSleep(todayData.sleep_minutes) : "--";
 
@@ -1126,7 +1152,7 @@ async function loadDailyHealthLog() {
     todayData?.steps ?? "--";
 
   stressScoreEl.textContent =
-    todayData?.stress_score ?? "--";
+    todayResilienceText ?? "--";
 
   applyCompareClass(
     sleepDurationEl,
@@ -1141,8 +1167,8 @@ async function loadDailyHealthLog() {
   );
 
   applyCompareClass(
-  stressScoreEl,
-  todayData?.stress_score,
-  yesterdayData?.stress_score
-);
+    stressScoreEl,
+    getResilienceRank(todayResilienceText),
+    getResilienceRank(yesterdayResilienceText)
+  );
 }
