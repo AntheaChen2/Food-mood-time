@@ -1642,3 +1642,31 @@ h2 {
   overflow: hidden !important;
   text-overflow: ellipsis !important;
 }
+
+.resilience-chart-mode .chart-axis-line {
+  display: none;
+}
+
+.resilience-chart-mode .average-line {
+  display: none !important;
+}
+
+.resilience-chart-mode .mini-chart-line {
+  display: none;
+}
+
+.resilience-chart-mode .resilience-label {
+  font-size: 14px;
+  font-weight: 800;
+  fill: #7b8190;
+}
+
+.resilience-chart-mode .resilience-point {
+  width: 22px;
+  height: 22px;
+  stroke-width: 2.2;
+}
+
+.resilience-chart-mode {
+  margin-top: 2px;
+}
