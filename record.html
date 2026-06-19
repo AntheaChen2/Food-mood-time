@@ -123,6 +123,43 @@
         <textarea id="notes" rows="4" placeholder="例如：今天完成報告，犒賞一下自己；飯後有點想睡。"></textarea>
       </section>
 
+      <section class="card optional-card" data-section="healthInfo">
+        <p class="step-label">7. 生理資訊</p>
+        <h2>今天的生理資訊</h2>
+        <p class="hint">查看google health和手錶，資料會自動幫你帶到首頁健康紀錄</p>
+        <div class="two-column">
+          <label class="field-card">
+            <span class="field-card-title">睡眠時長</span>
+            <div class="sleep-duration-row">
+              <input
+                id="sleepDuration"
+                type="number"
+                min="0"
+                max="24"
+                step="0.1"
+                placeholder="7.5"
+                aria-label="睡眠時長"
+              />
+            </div>
+          </label>
+          <label class="field-card">
+            <span class="field-card-title">睡眠分數</span>
+            <input id="sleepScore" type="number" min="0" max="100" step="1" placeholder="例如 82" />
+          </label>
+          <label class="field-card">
+            <span class="field-card-title">步數</span>
+            <input id="stepCount" type="number" min="0" step="1" placeholder="例如 9000" />
+          </label>
+          <label class="field-card">
+            <span class="field-card-title">壓力分數</span>
+            <input id="stressScore" type="number" min="0" max="100" step="1" placeholder="例如 35" />
+          </label>
+        </div>
+        <div class="field-card" style="margin-top: 12px;">
+          <span class="field-card-title">韌性</span>
+          <div class="choice-row" id="resilienceChoices"></div>
+        </div>
+      </section>
 
       <button type="submit" class="save-button">完成並儲存</button>
     </form>
