@@ -55,10 +55,18 @@ button { cursor: pointer; }
 .hidden { display: none !important; }
 
 .field-label, .field-card { display: grid; gap: 8px; font-weight: 800; font-size: 15px; }
+.field-card-title { font-size: 14px; color: var(--muted); }
 input, textarea { width: 100%; border: 1px solid var(--border); background: #f9f8f6; border-radius: 13px; padding: 12px; outline: none; font-size: 16px; }
+input::placeholder, textarea::placeholder { color: #b7afa3; opacity: 1; }
 textarea { resize: vertical; line-height: 1.45; }
 input:focus, textarea:focus { border-color: var(--accent-dark); box-shadow: 0 0 0 3px rgba(255,197,98,.25); }
 .two-column { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+.sleep-duration-row { display: flex; align-items: center; gap: 6px; }
+.sleep-duration-row input { flex: 1; min-width: 0; }
+.sleep-duration-unit { color: var(--muted); font-size: 13px; font-weight: 700; white-space: nowrap; }
+input[type="number"]::-webkit-outer-spin-button,
+input[type="number"]::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
+input[type="number"] { appearance: textfield; -moz-appearance: textfield; }
 
 .choice-row, .tags, .tag-container { display: flex; flex-wrap: wrap; gap: 8px; }
 .choice, .tag { border: 1px solid var(--border); background: #fff; border-radius: 999px; padding: 10px 14px; min-height: 42px; font-weight: 750; color: #241d16; }
