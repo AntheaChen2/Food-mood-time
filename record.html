@@ -126,38 +126,18 @@
       <section class="card optional-card" data-section="healthInfo">
         <p class="step-label">7. 生理資訊</p>
         <h2>今天的生理資訊</h2>
-        <p class="hint">查看google health和手錶，資料會自動幫你帶到首頁健康紀錄</p>
+        <p class="hint">查看google health app和手錶</p>
         <div class="two-column">
-          <label class="field-card">
-            <span class="field-card-title">睡眠時長</span>
-            <div class="sleep-duration-row">
-              <input
-                id="sleepDuration"
-                type="number"
-                min="0"
-                max="24"
-                step="0.1"
-                placeholder="7.5"
-                aria-label="睡眠時長"
-              />
+          <label class="field-card health-score-card">
+            <span class="field-card-title">壓力分數</span>
+            <div class="stress-score-input-wrap">
+              <input id="stressScore" type="number" min="0" max="100" step="1" placeholder="例如 35" />
             </div>
           </label>
-          <label class="field-card">
-            <span class="field-card-title">睡眠分數</span>
-            <input id="sleepScore" type="number" min="0" max="100" step="1" placeholder="例如 82" />
-          </label>
-          <label class="field-card">
-            <span class="field-card-title">步數</span>
-            <input id="stepCount" type="number" min="0" step="1" placeholder="例如 9000" />
-          </label>
-          <label class="field-card">
-            <span class="field-card-title">壓力分數</span>
-            <input id="stressScore" type="number" min="0" max="100" step="1" placeholder="例如 35" />
-          </label>
-        </div>
-        <div class="field-card" style="margin-top: 12px;">
-          <span class="field-card-title">韌性</span>
-          <div class="choice-row" id="resilienceChoices"></div>
+          <div class="field-card">
+            <span class="field-card-title">韌性</span>
+            <div class="choice-row" id="resilienceChoices"></div>
+          </div>
         </div>
       </section>
 
