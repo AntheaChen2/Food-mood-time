@@ -61,6 +61,53 @@ input::placeholder, textarea::placeholder { color: #b7afa3; opacity: 1; }
 textarea { resize: vertical; line-height: 1.45; }
 input:focus, textarea:focus { border-color: var(--accent-dark); box-shadow: 0 0 0 3px rgba(255,197,98,.25); }
 .two-column { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+.health-score-card { padding: 14px; }
+.stress-score-input-wrap {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: #fff;
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  padding: 10px 12px;
+  min-height: 50px;
+  transition: border-color .15s ease, box-shadow .15s ease;
+}
+.stress-score-input-wrap:hover {
+  border-color: #cfc3ae;
+}
+.stress-score-input-wrap input {
+  flex: 1;
+  min-width: 0;
+  border: 0;
+  background: transparent;
+  padding: 0;
+  font-size: 17px;
+  font-weight: 800;
+  color: var(--text);
+  box-shadow: none;
+  text-align: left;
+}
+.stress-score-input-wrap input:focus {
+  border: 0;
+  box-shadow: none;
+  outline: none;
+}
+.stress-score-unit {
+  color: #8b857d;
+  font-size: 13px;
+  font-weight: 800;
+  white-space: nowrap;
+  letter-spacing: .02em;
+}
+.health-inline-grid { align-items: stretch; }
+.health-score-card,
+.health-resilience-card { align-self: stretch; }
+.health-score-card { padding: 14px; }
+.health-score-card input { min-height: 48px; padding: 12px 14px; }
+.health-resilience-card { padding: 14px; }
+.resilience-choice-row { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; }
+.resilience-choice-row .choice { width: 100%; min-height: 48px; text-align: center; padding: 10px 6px; border-radius: 14px; }
 .sleep-duration-row { display: flex; align-items: center; gap: 6px; }
 .sleep-duration-row input { flex: 1; min-width: 0; }
 .sleep-duration-unit { color: var(--muted); font-size: 13px; font-weight: 700; white-space: nowrap; }
