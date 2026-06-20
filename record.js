@@ -164,14 +164,6 @@ async function convertImageToJpeg(file, quality = 0.9) {
 function todayDate() { return formatDate(); }
 function nowTime() { return formatTime(); }
 
-function parseSleepDurationToMinutes(hoursValue) {
-  const hours = Number(hoursValue);
-
-  if (Number.isNaN(hours) || hours < 0) return null;
-
-  return Math.round(hours * 60);
-}
-
 function getMealTimeCache() {
   try {
     return JSON.parse(localStorage.getItem('food_mood_meal_time_cache') || '{}');
@@ -201,7 +193,7 @@ async function loadSavedHealthData(date) {
 
   const { data, error } = await db
     .from('daily_health_logs')
-    .select('sleep_minutes, sleep_score, steps, stress_score, resilience')
+    .select('stress_score, resilience')
     .eq('user_id', currentUser.id)
     .eq('log_date', date)
     .maybeSingle();
@@ -213,24 +205,7 @@ async function loadSavedHealthData(date) {
 
   if (!data) return;
 
-  const sleepDurationInput = document.getElementById('sleepDuration');
-  const sleepScoreInput = document.getElementById('sleepScore');
-  const stepCountInput = document.getElementById('stepCount');
   const stressScoreInput = document.getElementById('stressScore');
-
-  if (data.sleep_minutes != null && sleepDurationInput) {
-    const totalMinutes = Math.max(0, Number(data.sleep_minutes) || 0);
-    const hours = totalMinutes / 60;
-    sleepDurationInput.value = Number.isInteger(hours) ? hours.toString() : hours.toFixed(1);
-  }
-
-  if (data.sleep_score != null && sleepScoreInput) {
-    sleepScoreInput.value = data.sleep_score;
-  }
-
-  if (data.steps != null && stepCountInput) {
-    stepCountInput.value = data.steps;
-  }
 
   if (data.stress_score != null && stressScoreInput) {
     stressScoreInput.value = data.stress_score;
@@ -246,9 +221,6 @@ async function upsertDailyHealthLog(userId, logDate, values) {
   const payload = {
     user_id: userId,
     log_date: logDate,
-    sleep_minutes: values.sleep_minutes ?? null,
-    sleep_score: values.sleep_score ?? null,
-    steps: values.steps ?? null,
     stress_score: values.stress_score ?? null,
     resilience: values.resilience || null
   };
@@ -420,9 +392,6 @@ function bindEvents() {
     });
   };
 
-  clampInput('sleepDuration', 0, 24);
-  clampInput('sleepScore', 0, 100);
-  clampInput('stepCount', 0, null);
   clampInput('stressScore', 0, 100);
 }
 
@@ -656,9 +625,6 @@ async function saveRecord() {
   const date = document.getElementById('mealDate').value;
   const time = document.getElementById('mealTime').value;
   const notes = document.getElementById('notes').value.trim();
-  const sleepDurationValue = document.getElementById('sleepDuration').value.trim();
-  const sleepScoreValue = document.getElementById('sleepScore').value.trim();
-  const stepCountValue = document.getElementById('stepCount').value.trim();
   const stressScoreValue = document.getElementById('stressScore').value.trim();
   const resilienceValue = state.selected.resilience || '';
 
@@ -767,21 +733,8 @@ async function saveRecord() {
     return;
   }
 
-  const sleepMinutes = sleepDurationValue
-    ? parseSleepDurationToMinutes(sleepDurationValue)
-    : null;
-
-  if (
-    sleepMinutes != null ||
-    sleepScoreValue ||
-    stepCountValue ||
-    stressScoreValue ||
-    resilienceValue
-  ) {
+  if (stressScoreValue || resilienceValue) {
     const healthError = await upsertDailyHealthLog(currentUser.id, date, {
-      sleep_minutes: sleepMinutes,
-      sleep_score: sleepScoreValue ? Number(sleepScoreValue) : null,
-      steps: stepCountValue ? Number(stepCountValue) : null,
       stress_score: stressScoreValue ? Number(stressScoreValue) : null,
       resilience: resilienceValue || null
     });
